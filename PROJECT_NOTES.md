@@ -12,7 +12,7 @@
 | 日期 | 位置 | 改了什么 |
 |------|------|----------|
 | 2026-09-02 | 首次提交 | 推送 GitHub `arraytechcn/baby_school`（commit a8d3c63）：MVP 语音陪伴闭环全部代码 |
-| 2026-09-02 | tools/ | **新增语音播报本地服务 `tools/tts_server.py`**（127.0.0.1:8799）：`POST /speak {text,voice?,rate?,pitch?}` 合成+afplay 播放（自动打断上一句）、`POST /stop`、`GET /health`；Key 取环境变量 `DASHSCOPE_API_KEY` 或根目录 `config.local.json`（已 gitignore，**Key 不进仓库**）。配套 `tools/say.sh "文字"` 一行命令包装，供 DeepSeek harness / Claude Code 等外部工具在回答时调用播报。实测：health/speak/stop/打断全通 |
+| 2026-09-02 | tools/ | **新增语音播报本地服务 `tools/tts_server.py`**（127.0.0.1:8799）：`POST /speak {text,voice?,rate?,pitch?}` 合成+afplay 播放（自动打断上一句）、`POST /stop`、`GET /health`；Key 取环境变量 `DASHSCOPE_API_KEY` 或根目录 `config.local.json`（已 gitignore，**Key 不进仓库**）。配套 `tools/say.sh "文字"` 一行命令包装，供 DeepSeek harness / Claude Code 等外部工具在回答时调用播报。实测：health/speak/stop/打断全通。**接入文档：`docs/tts-api.md`**（用户决定 Kimi Web 接入交给其他人做，本文档即交接物） |
 
 ### DeepSeek harness 播报接入方法
 
