@@ -11,6 +11,18 @@
 
 | 日期 | 位置 | 改了什么 |
 |------|------|----------|
+| 2026-09-02 | 首次提交 | 推送 GitHub `arraytechcn/baby_school`（commit a8d3c63）：MVP 语音陪伴闭环全部代码 |
+| 2026-09-02 | tools/ | **新增语音播报本地服务 `tools/tts_server.py`**（127.0.0.1:8799）：`POST /speak {text,voice?,rate?,pitch?}` 合成+afplay 播放（自动打断上一句）、`POST /stop`、`GET /health`；Key 取环境变量 `DASHSCOPE_API_KEY` 或根目录 `config.local.json`（已 gitignore，**Key 不进仓库**）。配套 `tools/say.sh "文字"` 一行命令包装，供 DeepSeek harness / Claude Code 等外部工具在回答时调用播报。实测：health/speak/stop/打断全通 |
+
+### DeepSeek harness 播报接入方法
+
+```bash
+# 1. 启动播报服务（Key 走环境变量）
+DASHSCOPE_API_KEY=sk-xxx python3 tools/tts_server.py
+
+# 2. harness 回答完成时调用
+bash tools/say.sh "这里是回答内容"
+```
 | 2026-09-02 | 项目初始化 | 新建项目，绑定远程仓库 `github.com/arraytechcn/baby_school`；从 xiang 项目复制 CLAUDE.md / PROJECT_NOTES.md 模板并清空改写为本项目内容；确立规范：全项目禁 emoji（奖励图标用 SVG/CSS）、调试 Chrome(:9222) 验证、改动后主动汇报 |
 | 2026-09-02 | 语音模块（第一步） | 新增 `js/tts.js`（Web Speech API 封装：rate 0.88/pitch 0.9...见文件默认值，中文温柔女声挑选含中文名 婷婷/美嘉；`speak(text, {onStart,onMouth,onEnd,onFallback})` 引擎无关接口）、`js/sfx.js`（Web Audio 合成答对/答错/星星音效，无外部音频文件，默认音量 30%）、`index.html` 语音测试页。注意：demo 页与 tts.js 都必须用 `addEventListener('voiceschanged')`，赋值 onvoiceschanged 会互相覆盖。同日晚些时候已升级为 CosyVoice 双引擎（见下方另一条） |
 | 2026-09-02 | 技术选型 | TTS 定为「CosyVoice（百炼，与千问同 DashScope Key）为主，Web Speech API 降级兜底」。**正确接口**：`POST https://dashscope.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer`（model=cosyvoice-v3-flash，text/voice/format/rate/pitch 都在 `input` 里），返回 JSON 的 `output.audio.url`（OSS 链接 24h，默认 http 需换 https），需二次 fetch 下载 mp3。注意：① OpenAI 兼容模式不支持 audio/speech；② 网上流传的 `/services/aigc/text2audio/text-to-audio` 路径是错的（报 url error）；③ **cosyvoice-v2 在当前账号报错 418 不可用**，且 v2/v3 音色不通用，v3 音色带 `_v3` 后缀 |
