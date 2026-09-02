@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>小星姐姐 — 成长陪伴室</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #FFF8F0;
+    color: #5a4a42;
+    display: flex; flex-direction: column;
+    height: 100%;
+    user-select: none;
+  }
+
+  /* ---------- 顶部：圆形头像（小宠物式） ---------- */
+  #header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px 10px;
+  }
+  #avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: #FFF3E0;
+    border: 3px solid #f0dcc8;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    transition: box-shadow 0.3s;
+  }
+  #avatar.speaking { box-shadow: 0 0 0 6px rgba(255,179,126,0.35); }
+  #avatar svg {
+    position: absolute; left: 50%; top: 6px;
+    transform: translateX(-50%);
+    width: 60px; height: 72px;
+  }
+  #header-name { font-size: 20px; font-weight: 600; }
+  #header-state { font-size: 14px; color: #a08b80; }
+
+  /* 表情状态（头像内 SVG） */
+  .eye-happy, .eye-blink { opacity: 0; }
+  #avatar.happy .eye-open { opacity: 0; }
+  #avatar.happy .eye-happy { opacity: 1; }
+  #avatar.blink .eye-open { opacity: 0; }
+  #avatar.blink .eye-blink { opacity: 1; }
+  #avatar .mouth-open1, #avatar .mouth-open2 { display: none; }
+
+  /* ---------- 对话流（微信式） ---------- */
+  #history {
+    flex: 1; overflow-y: auto; min-height: 0;
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 10px 16px;
+  }
+  .msg { display: flex; gap: 10px; animation: pop 0.25s ease; }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .msg.kid { flex-direction: row-reverse; }
+  .mini-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #FFF3E0; border: 2px solid #f0dcc8;
+    overflow: hidden; flex-shrink: 0; position: relative;
+  }
+  .mini-avatar svg { position: absolute; left: 50%; top: 3px; transform: translateX(-50%); width: 34px; height: 40px; }
+  .mini-avatar.kid-face { background: #E3F2FD; border-color: #c8e0f5; display: flex; align-items: center; justify-content: center; }
+  .mini-avatar.kid-face svg { position: static; transform: none; width: 22px; height: 22px; }
+  .bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 18px; line-height: 1.6;
+  }
+  .msg.sister .bubble { background: #FFF3E0; border-top-left-radius: 4px; }
+  .msg.kid .bubble { background: #E3F2FD; border-top-right-radius: 4px; cursor: pointer; }
+  /* 识别中的孩子气泡：省略号呼吸动画 */
+  .bubble.live { animation: breathe-bubble 1s ease-in-out infinite; }
+  @keyframes breathe-bubble { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+  /* ---------- 底部操作栏 ---------- */
+  #controls {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px 16px 24px;
+  }
+  #mic-btn {
+    width: 88px; height: 88px; border-radius: 50%;
+    border: none; cursor: pointer; flex-shrink: 0;
+    background: #ffb37e;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(255,179,126,0.4);
+    transition: transform 0.15s, background 0.15s;
+    touch-action: none;
+    position: relative;
+  }
+  #mic-btn svg { width: 40px; height: 40px; }
+  /* 按住说话时：整页高亮 + 按钮脉冲 */
+  #mic-btn.recording { background: #ff8a4d; transform: scale(1.18); }
+  #mic-btn.recording::after {
+    content: '';
+    position: absolute; inset: -10px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,138,77,0.5);
+    animation: pulse 1s ease-out infinite;
+  }
+  @keyframes pulse {
+    from { transform: scale(0.9); opacity: 1; }
+    to { transform: scale(1.5); opacity: 0; }
+  }
+  body.recording #history { opacity: 0.45; }
+  body.recording #header { opacity: 0.45; }
+  /* 录音时整屏暖橙内描边，一眼可辨 */
+  body.recording { box-shadow: inset 0 0 0 10px rgba(255,138,77,0.55); }
+  #history, #header { transition: opacity 0.2s; }
+
+  #record-banner {
+    position: fixed; left: 50%; top: 96px; transform: translateX(-50%);
+    background: rgba(90,74,66,0.9); color: #fff;
+    padding: 12px 26px; border-radius: 24px; font-size: 18px;
+    display: none; z-index: 10;
+  }
+  body.recording #record-banner { display: block; }
+
+  /* 实时识别气泡：悬浮在麦克风上方 */
+  #live-bubble {
+    position: fixed; left: 50%; bottom: 130px; transform: translateX(-50%);
+    max-width: 82%;
+    background: #E3F2FD; color: #5a4a42;
+    padding: 14px 20px; border-radius: 20px; border-bottom-right-radius: 4px;
+    font-size: 19px; line-height: 1.6;
+    display: none; z-index: 11;
+    box-shadow: 0 4px 16px rgba(90,74,66,0.15);
+  }
+  body.recording #live-bubble { display: block; }
+  #live-bubble.live { animation: breathe-bubble 1.2s ease-in-out infinite; }
+  @keyframes breathe-bubble { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  #toast {
+    position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+    background: rgba(90,74,66,0.85); color: #fff;
+    padding: 10px 22px; border-radius: 18px; font-size: 16px;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 20;
+  }
+</style>
+</head>
+<body>
+  <div id="toast"></div>
+  <div id="record-banner">正在听你说 <span id="record-secs">0</span>s，松开结束</div>
+  <div id="live-bubble">...</div>
+
+  <div id="header">
+    <div id="avatar">
+      <svg viewBox="58 52 84 84" xmlns="http://www.w3.org/2000/svg">
+        <path d="M45 130 C38 70 60 30 100 30 C140 30 162 70 155 130 L150 175 C130 165 120 150 118 132 L82 132 C80 150 70 165 50 175 Z" fill="#8a6844"/>
+        <ellipse cx="100" cy="105" rx="42" ry="45" fill="#FFE8D6"/>
+        <path d="M58 95 C56 58 76 42 100 42 C124 42 144 58 142 95 C132 78 124 74 120 84 C112 70 104 70 100 80 C96 70 88 70 80 84 C76 74 68 78 58 95 Z" fill="#8a6844"/>
+        <ellipse cx="72" cy="122" rx="8" ry="5" fill="#FFC0B8" opacity="0.7"/>
+        <ellipse cx="128" cy="122" rx="8" ry="5" fill="#FFC0B8" opacity="0.7"/>
+        <g class="eye-open">
+          <ellipse cx="82" cy="105" rx="6" ry="8" fill="#4a3a32"/>
+          <circle cx="84" cy="102" r="2" fill="#fff"/>
+          <ellipse cx="118" cy="105" rx="6" ry="8" fill="#4a3a32"/>
+          <circle cx="120" cy="102" r="2" fill="#fff"/>
+        </g>
+        <g class="eye-blink">
+          <path d="M76 106 Q82 108 88 106" stroke="#4a3a32" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M112 106 Q118 108 124 106" stroke="#4a3a32" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </g>
+        <g class="eye-happy">
+          <path d="M75 104 Q82 97 89 104" stroke="#4a3a32" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M111 104 Q118 97 125 104" stroke="#4a3a32" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </g>
+        <path class="mouth-smile" d="M88 132 Q100 141 112 132" stroke="#c96f5e" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse class="mouth-open1" cx="100" cy="135" rx="8" ry="5" fill="#c96f5e"/>
+        <ellipse class="mouth-open2" cx="100" cy="136" rx="9" ry="8" fill="#c96f5e"/>
+      </svg>
+    </div>
+    <div>
+      <div id="header-name">小星姐姐</div>
+      <div id="header-state">在线</div>
+    </div>
+  </div>
+
+  <div id="history"></div>
+
+  <div id="controls">
+    <button id="mic-btn" aria-label="按住说话">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="3" width="6" height="11" rx="3"/>
+        <path d="M5 11a7 7 0 0 0 14 0"/>
+        <path d="M12 18v3"/>
+      </svg>
+    </button>
+  </div>
+
+<script type="module">
+import { tts } from './js/tts.js';
+import { asr } from './js/asr.js';
+import { replySmart, greeting, sanitize } from './js/brain.js';
+
+const avatar = document.getElementById('avatar');
+const historyEl = document.getElementById('history');
+const micBtn = document.getElementById('mic-btn');
+const headerState = document.getElementById('header-state');
+const toast = document.getElementById('toast');
+let blinkTimer = null;
+let busy = false;
+
+/* ---------- 头像表情状态机 ---------- */
+const SISTER_FACE = avatar.querySelector('svg').outerHTML; // 复用到气泡头像
+function setMood(mood) {
+  avatar.classList.remove('happy');
+  if (mood === 'happy') avatar.classList.add('happy');
+  const label = { idle: '在线', talking: '说话中', thinking: '思考中', happy: '好开心', encouraging: '陪着你' };
+  headerState.textContent = label[mood] || '在线';
+}
+function setMouth(f) {
+  avatar.querySelector('.mouth-smile').style.display = f === 0 ? '' : 'none';
+  avatar.querySelector('.mouth-open1').style.display = f === 1 ? '' : 'none';
+  avatar.querySelector('.mouth-open2').style.display = f === 2 ? '' : 'none';
+}
+function startBlink() {
+  clearInterval(blinkTimer);
+  blinkTimer = setInterval(() => {
+    avatar.classList.add('blink');
+    setTimeout(() => avatar.classList.remove('blink'), 160);
+  }, 3000 + Math.random() * 2000);
+}
+startBlink();
+
+/* ---------- 消息流 ---------- */
+function addBubble(text, who) {
+  const row = document.createElement('div');
+  row.className = 'msg ' + who;
+  const av = document.createElement('div');
+  if (who === 'sister') {
+    av.className = 'mini-avatar';
+    av.innerHTML = SISTER_FACE;
+  } else {
+    av.className = 'mini-avatar kid-face';
+    av.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#7fb3e0" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>';
+  }
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = text;
+  row.appendChild(av);
+  row.appendChild(b);
+  historyEl.appendChild(row);
+  historyEl.scrollTop = historyEl.scrollHeight;
+  return b;
+}
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.style.opacity = 1;
+  setTimeout(() => toast.style.opacity = 0, 2500);
+}
+
+/* ---------- 说话（TTS + 口型 + 表情） ---------- */
+async function speak(text, mood = 'idle') {
+  setMood(mood);
+  await tts.speak(text, {
+    onStart() { avatar.classList.add('speaking'); },
+    onMouth(f) { setMouth(f); },
+    onEnd() {
+      avatar.classList.remove('speaking');
+      setMouth(0);
+      setTimeout(() => setMood('idle'), 200);
+    },
+    onFallback() { showToast('小星姐姐嗓子有点哑，我们看她写字吧'); },
+  });
+}
+
+/* ---------- 一轮对话 ---------- */
+async function handleKidInput(text) {
+  if (busy || !text.trim()) return;
+  busy = true;
+  setMood('thinking');
+  const r = await replySmart(text);
+  addBubble(r.text, 'sister');
+  await speak(r.text, r.mood);
+  busy = false;
+}
+
+/* ---------- 长按说话（按下时暂停姐姐说话 + 整页高亮 + 麦克风上方实时气泡） ---------- */
+let pressing = false;
+let pressStartAt = 0;
+let secTimer = null;   // 录音秒数
+const liveBubble = document.getElementById('live-bubble');
+
+function startSecCounter() {
+  const el = document.getElementById('record-secs');
+  const t0 = Date.now();
+  el.textContent = '0';
+  clearInterval(secTimer);
+  secTimer = setInterval(() => { el.textContent = Math.floor((Date.now() - t0) / 1000); }, 500);
+}
+function stopSecCounter() { clearInterval(secTimer); }
+
+async function onPressStart(e) {
+  e.preventDefault();
+  if (pressing) return;
+  if (!asr.supported || !asr.hasKey) {
+    showToast(!asr.supported ? '这个浏览器不支持语音' : '还没有配置 API Key');
+    return;
+  }
+  pressing = true;
+  pressStartAt = Date.now();
+  // 把手指/鼠标锁定在按钮上：滑出按钮边缘也算按着，只有真正抬手才结束
+  try { micBtn.setPointerCapture(e.pointerId); } catch {}
+  tts.stop();                       // 孩子说话时姐姐立即安静
+  avatar.classList.remove('speaking');
+  setMouth(0);
+  busy = false;                     // 打断进行中的回复
+
+  // 麦克风上方的实时气泡立即出现
+  liveBubble.textContent = '...';
+  liveBubble.classList.add('live');
+
+  const ok = await asr.startLive(
+    text => { liveBubble.textContent = sanitize(text); liveBubble.classList.remove('live'); },
+    () => { showToast('说得有点长哦，先到这里~'); onPressEnd(); }
+  );
+  if (!ok) {
+    pressing = false;
+    document.body.classList.remove('recording');
+    micBtn.classList.remove('recording');
+    stopSecCounter();
+    showToast('麦克风打不开，请检查权限');
+    return;
+  }
+  micBtn.classList.add('recording');
+  document.body.classList.add('recording');
+  startSecCounter();
+}
+
+async function onPressEnd() {
+  if (!pressing) return;
+  pressing = false;
+  micBtn.classList.remove('recording');
+  document.body.classList.remove('recording');
+  stopSecCounter();
+  const text = await asr.stopLive();
+  liveBubble.textContent = '...';
+  if (!text) {
+    // 按得太短（误触）只提示不播语音；认真说了但没识别出来才播"没听清"
+    if (Date.now() - pressStartAt < 1500) {
+      showToast('按住按钮再说话哦');
+    } else {
+      await speak('小星姐姐没听清，你可以再说一次吗？', 'thinking');
+    }
+    return;
+  }
+  const safeText = sanitize(text);
+  const b = addBubble(safeText, 'kid');
+  b.onclick = () => speak(safeText); // 点击朗读，辅助识字
+  await handleKidInput(safeText);
+}
+
+micBtn.addEventListener('pointerdown', onPressStart);
+micBtn.addEventListener('pointerup', onPressEnd);
+micBtn.addEventListener('pointercancel', onPressEnd);
+micBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- 开场白 ---------- */
+(async () => {
+  const g = greeting();
+  addBubble(g, 'sister');
+  await speak(g, 'happy');
+})();
+</script>
+</body>
+</html>
