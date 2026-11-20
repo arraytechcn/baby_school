@@ -302,6 +302,7 @@
   body:not(.chat-view) #live-bubble,
   body:not(.chat-view) #record-banner { display: none !important; }
   body.in-call .home-actions { display: none; }
+  body.dressing #character { visibility: hidden; }
   body:not(.in-call) #call-panel { display: none; }
 
   .home-top { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px 0; }
@@ -431,8 +432,8 @@
   @keyframes twinkle { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 
   .character {
-    position: absolute; left: 50%; bottom: 3%;
-    height: 88%; max-height: 520px; aspect-ratio: 220 / 380;
+    position: absolute; left: 50%; bottom: 2%;
+    height: 92%; max-height: 680px; aspect-ratio: 220 / 380;
     transform: translateX(-50%);
     cursor: pointer; outline: none;
     -webkit-tap-highlight-color: transparent;
@@ -454,7 +455,7 @@
   .ch-sole { fill: #5F4A3B; }
   .ch-collar { fill: #FFFDF9; }
   .ch-button { fill: #C9B3A3; }
-  .ch-cap, .ch-beret { display: none; }
+  .ch-cap, .ch-beret, .ch-hair-bow, .ch-hair-star, .ch-necklace, .ch-bracelet { display: none; }
   .ch-mouth-1, .ch-mouth-2 { display: none; }
   #character.mouth-1 .ch-mouth-smile, #character.mouth-2 .ch-mouth-smile { display: none; }
   #character.mouth-1 .ch-mouth-1 { display: block; }
@@ -587,7 +588,7 @@
     .home-hello { font-size: 20px; }
     .scene-window { width: 46%; height: 42%; }
     .scene-plant { transform: scale(0.86); transform-origin: bottom right; }
-    .character { height: 84%; }
+    .character { height: 90%; }
     .action { min-height: 50px; font-size: 14px; }
     .action.primary { min-height: 56px; font-size: 16px; }
   }
@@ -629,6 +630,30 @@
     font-size: 15px; line-height: 1; cursor: pointer;
   }
   .sheet-note { font-size: 12.5px; color: #a08b80; margin: 10px 0 0; }
+  .dress-preview {
+    height: 240px; display: flex; align-items: flex-end; justify-content: center;
+    margin: 0 0 8px;
+  }
+  .dress-preview svg { height: 100%; width: auto; max-width: 100%; }
+  .dress-cats { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+  .dress-cats::-webkit-scrollbar { display: none; }
+  .dress-cat {
+    flex: 0 0 auto; min-height: 34px; padding: 0 12px;
+    border-radius: 999px; border: 1px solid #F0DCC8; background: #fff;
+    color: #8a6f5c; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .dress-cat.active { background: #FFF3E0; border-color: #FFB37E; color: #A8471F; font-weight: 600; }
+  .dress-items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+  .dress-item {
+    border: 2px solid #F0DCC8; border-radius: 14px; background: #fff;
+    padding: 8px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font: inherit; font-size: 12.5px; color: #5a4a42; cursor: pointer;
+  }
+  .dress-item.selected { border-color: #FFB37E; background: #FFF3E0; }
+  .dress-item.locked { opacity: 0.6; }
+  .dress-item .sw { width: 30px; height: 30px; border-radius: 50%; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.06); }
+  .dress-item .cost { font-size: 11px; color: #a08b80; }
+
   .outfit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .outfit-card {
     display: flex; align-items: center; gap: 10px;
@@ -707,32 +732,37 @@
   .star-row .meta.ok { color: #5E7C62; }
 
   /* 服装配色与装饰 */
-  #character[data-outfit="daily"] .ch-top { fill: #FFF3E0; }
-  #character[data-outfit="daily"] .ch-pants { fill: #7FA8C9; }
-  #character[data-outfit="daily"] .ch-shoe { fill: #8A6844; }
+  [data-top="top-cream"] .ch-top { fill: #FFF3E0; }
+  [data-top="top-tee"] .ch-top { fill: #8FB79A; }
+  [data-top="top-pajama"] .ch-top { fill: #A6C4E4; }
+  [data-top="top-festival"] .ch-top { fill: #FFF3D6; }
 
-  #character[data-outfit="pajama"] .ch-top { fill: #A6C4E4; }
-  #character[data-outfit="pajama"] .ch-pants { fill: #8FB0D6; }
-  #character[data-outfit="pajama"] .ch-socks { fill: #FFF7EC; }
-  #character[data-outfit="pajama"] .ch-shoe { fill: #D9A5A0; }
-  #character[data-outfit="pajama"] .ch-sole { fill: #B98A86; }
+  [data-bottom="bottom-denim"] .ch-pants { fill: #7FA8C9; }
+  [data-bottom="bottom-blue"] .ch-pants { fill: #8FB0D6; }
+  [data-bottom="bottom-navy"] .ch-pants { fill: #4F6B86; }
+  [data-bottom="bottom-gold"] .ch-skirt { display: block; fill: #E7B36A; }
+  [data-bottom="bottom-gold"] .ch-pants { display: none; }
 
-  #character[data-outfit="sport"] .ch-top { fill: #8FB79A; }
-  #character[data-outfit="sport"] .ch-pants { fill: #4F6B86; }
-  #character[data-outfit="sport"] .ch-shoe { fill: #FFFDF9; }
-  #character[data-outfit="sport"] .ch-sole { fill: #C9B3A3; }
-  #character[data-outfit="sport"] .ch-cap { display: block; }
+  [data-shoes="shoe-brown"] .ch-shoe { fill: #8A6844; }
+  [data-shoes="shoe-brown"] .ch-sole { fill: #5F4A3B; }
+  [data-shoes="shoe-pink"] .ch-shoe { fill: #D9A5A0; }
+  [data-shoes="shoe-pink"] .ch-sole { fill: #B98A86; }
+  [data-shoes="shoe-white"] .ch-shoe { fill: #FFFDF9; }
+  [data-shoes="shoe-white"] .ch-sole { fill: #C9B3A3; }
+  [data-shoes="shoe-red"] .ch-shoe { fill: #B04A28; }
+  [data-shoes="shoe-red"] .ch-sole { fill: #8A3A1E; }
 
-  #character[data-outfit="festival"] .ch-top { fill: #FFF3D6; }
-  #character[data-outfit="festival"] .ch-skirt { display: block; }
-  #character[data-outfit="festival"] .ch-pants { display: none; }
-  #character[data-outfit="festival"] .ch-shoe { fill: #B04A28; }
-  #character[data-outfit="festival"] .ch-sole { fill: #8A3A1E; }
-  #character[data-outfit="festival"] .ch-beret { display: block; }
+  [data-hat="hat-cap"] .ch-cap { display: block; }
+  [data-hat="hat-beret"] .ch-beret { display: block; }
+  [data-hair="hair-bow"] .ch-hair-bow { display: block; }
+  [data-hair="hair-star"] .ch-hair-star { display: block; }
+  [data-jewelry="jewelry-necklace"] .ch-necklace { display: block; }
+  [data-jewelry="jewelry-bracelet"] .ch-bracelet { display: block; }
+
   .ch-deco { display: none; }
-  #character[data-outfit="pajama"] .ch-deco-pajama { display: block; }
-  #character[data-outfit="sport"] .ch-deco-sport { display: block; }
-  #character[data-outfit="festival"] .ch-deco-festival { display: block; }
+  [data-top="top-pajama"] .ch-deco-pajama { display: block; }
+  [data-top="top-tee"] .ch-deco-sport { display: block; }
+  [data-bottom="bottom-gold"] .ch-deco-festival { display: block; }
 </style>
 </head>
 <body>
@@ -788,7 +818,10 @@
       <div class="scene-plant"><i class="leaf a"></i><i class="leaf b"></i><i class="leaf c"></i><i class="pot"></i></div>
       <div class="scene-rug"></div>
 
-      <div class="character" id="character" data-outfit="daily" role="button" tabindex="0" aria-label="和小星姐姐打招呼">
+      <div class="character" id="character"
+      data-top="top-cream" data-bottom="bottom-denim" data-shoes="shoe-brown"
+      data-hat="hat-none" data-hair="hair-none" data-jewelry="jewelry-none"
+      role="button" tabindex="0" aria-label="和小星姐姐打招呼">
         <svg viewBox="0 0 220 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <ellipse class="ch-shadow" cx="110" cy="368" rx="62" ry="8"/>
 
@@ -817,6 +850,10 @@
           <path class="ch-top" d="M84 148 C74 154 70 170 72 184 L86 182 L92 154 Z"/>
           <path class="ch-top" d="M136 148 C146 154 150 170 148 184 L134 182 L128 154 Z"/>
           <path class="ch-collar" d="M96 144 C102 152 108 155 110 155 C112 155 118 152 124 144 C120 141 115 140 110 140 C105 140 100 141 96 144 Z"/>
+          <g class="ch-necklace">
+            <path d="M99 152 C104 162 116 162 121 152" fill="none" stroke="#E7B36A" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="110" cy="161" r="2.4" fill="#E7B36A"/>
+          </g>
           <circle class="ch-button" cx="110" cy="192" r="2"/>
           <circle class="ch-button" cx="110" cy="214" r="2"/>
 
@@ -835,6 +872,9 @@
           <g class="ch-arm-wave">
             <path class="ch-skin" d="M146 182 C150 196 152 214 152 230 L140 234 C138 214 134 196 128 186 Z"/>
             <circle class="ch-skin" cx="146" cy="236" r="8"/>
+          </g>
+          <g class="ch-bracelet">
+            <ellipse cx="74" cy="224" rx="6" ry="2.4" fill="none" stroke="#B04A28" stroke-width="2"/>
           </g>
 
           <!-- 脖子与头 -->
@@ -860,6 +900,14 @@
           <path class="ch-mouth-smile" d="M101 112 Q110 119 119 112" stroke="#c96f5e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
           <ellipse class="ch-mouth-1" cx="110" cy="115" rx="6" ry="3.5" fill="#c96f5e"/>
           <ellipse class="ch-mouth-2" cx="110" cy="116" rx="7.5" ry="6.5" fill="#c96f5e"/>
+          <g class="ch-hair-bow">
+            <path d="M138 64 C150 56 160 62 156 72 C152 80 142 78 138 72 Z" fill="#E4572E"/>
+            <path d="M138 80 C150 88 160 82 156 72 C152 64 142 66 138 72 Z" fill="#E4572E"/>
+            <circle cx="138" cy="72" r="3" fill="#B03A1E"/>
+          </g>
+          <g class="ch-hair-star">
+            <path d="M72 56 l2.6 6 6.4 .5 -4.9 4.2 1.5 6.3 -5.6-3.4 -5.6 3.4 1.5-6.3 -4.9-4.2 6.4-.5z" fill="#F4D35E" stroke="#E0B93F" stroke-width="1"/>
+          </g>
 
           <!-- 帽子 -->
           <g class="ch-cap">
@@ -1028,8 +1076,10 @@
   <div class="sheet" id="dress-sheet" aria-hidden="true">
     <div class="sheet-card">
       <div class="sheet-head"><h3>换装</h3><button class="sheet-close" type="button" data-close="dress-sheet" aria-label="关闭">✕</button></div>
-      <div class="outfit-grid" id="outfit-grid"></div>
-      <p class="sheet-note">集齐星星解锁新衣服：每天第一次打电话 +1，答对一题 +1。</p>
+      <div class="dress-preview" id="dress-preview"></div>
+      <div class="dress-cats" id="dress-cats"></div>
+      <div class="dress-items" id="dress-items"></div>
+      <p class="sheet-note">按部位搭配：上衣、下装、鞋子、帽子、头饰、首饰。集齐星星解锁更多装扮。</p>
     </div>
   </div>
 
@@ -1113,7 +1163,7 @@ import { replySmart, greeting, sanitize } from './js/brain.js';
 import { qwen, getParentConfig, setParentConfig } from './js/qwen.js';
 import { store } from './js/store.js';
 import { memory } from './js/memory.js';
-import { rewards, OUTFITS, SUBJECTS, PER_SUBJECT } from './js/rewards.js';
+import { rewards, CATEGORIES, ITEMS, SUBJECTS, PER_SUBJECT } from './js/rewards.js';
 
 const avatar = document.getElementById('avatar');
 const historyEl = document.getElementById('history');
@@ -1612,13 +1662,68 @@ function exitCall() {
   renderHome();
 }
 
-function applyOutfit() {
-  const ch = document.getElementById('character');
-  if (ch) ch.dataset.outfit = rewards.getOutfit();
+function applyLook() {
+  const look = rewards.getLook();
+  ['character', 'dress-preview'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.dataset.top = look.top;
+    el.dataset.bottom = look.bottom;
+    el.dataset.shoes = look.shoes;
+    el.dataset.hat = look.hat;
+    el.dataset.hair = look.hair;
+    el.dataset.jewelry = look.jewelry;
+  });
+}
+
+let dressCategory = 'top';
+
+function renderDress() {
+  const wrap = document.getElementById('dress-preview');
+  if (wrap && !wrap.querySelector('svg')) {
+    const src = document.querySelector('#character svg');
+    if (src) wrap.appendChild(src.cloneNode(true));
+  }
+  const cats = document.getElementById('dress-cats');
+  const itemsBox = document.getElementById('dress-items');
+  if (!cats || !itemsBox) return;
+  cats.innerHTML = CATEGORIES.map(c => `<button class="dress-cat ${c.id === dressCategory ? 'active' : ''}" type="button" data-cat="${c.id}">${c.name}</button>`).join('');
+  cats.querySelectorAll('.dress-cat').forEach(btn => {
+    btn.onclick = () => { dressCategory = btn.dataset.cat; renderDress(); };
+  });
+  const look = rewards.getLook();
+  itemsBox.innerHTML = '';
+  (ITEMS[dressCategory] || []).forEach(item => {
+    const owned = rewards.isOwned(item.id);
+    const selected = look[dressCategory] === item.id;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'dress-item' + (selected ? ' selected' : '') + (owned ? '' : ' locked');
+    btn.innerHTML = `<span class="sw" style="background:${item.color}"></span><span>${item.name}</span><span class="cost">${owned ? (selected ? '正在穿' : '已拥有') : `需 ${item.cost} 星`}</span>`;
+    btn.onclick = () => {
+      if (owned) {
+        rewards.setLook(dressCategory, item.id);
+        applyLook();
+        renderDress();
+      } else if (rewards.getStars() >= item.cost) {
+        rewards.unlockItem(item.id);
+        rewards.setLook(dressCategory, item.id);
+        applyLook();
+        renderDress();
+        sfx.star();
+        showToast(`解锁了${item.name}`);
+      } else {
+        showToast(`还差 ${item.cost - rewards.getStars()} 颗星星`);
+      }
+    };
+    itemsBox.appendChild(btn);
+  });
+  applyLook();
 }
 
 function closeSheets() {
   stopDrawVoice();
+  document.body.classList.remove('dressing');
   const open = document.querySelectorAll('.sheet.show');
   if (!open.length) return;
   open.forEach(el => el.classList.remove('show'));
@@ -1631,49 +1736,11 @@ function openSheet(id) {
   if (el) el.classList.add('show');
 }
 
-function renderOutfits() {
-  const grid = document.getElementById('outfit-grid');
-  if (!grid) return;
-  const current = rewards.getOutfit();
-  grid.innerHTML = '';
-  OUTFITS.forEach(o => {
-    const owned = rewards.hasOutfit(o.id);
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'outfit-card' + (o.id === current ? ' selected' : '') + (owned ? '' : ' locked');
-    const swatch = document.createElement('span');
-    swatch.className = 'outfit-swatch';
-    swatch.style.background = o.color;
-    const text = document.createElement('span');
-    text.innerHTML = `<span class="outfit-name">${o.name}</span><br><span class="outfit-meta">${
-      owned ? (o.id === current ? '正在穿' : '已拥有') : `需 ${o.cost} 颗星星`
-    }</span>`;
-    card.appendChild(swatch);
-    card.appendChild(text);
-    card.onclick = () => {
-      if (owned) {
-        rewards.setOutfit(o.id);
-        rewards.syncUnlocks();
-  applyOutfit();
-        renderOutfits();
-      } else if (rewards.getStars() >= o.cost) {
-        rewards.unlockOutfit(o.id);
-        rewards.setOutfit(o.id);
-        applyOutfit();
-        renderOutfits();
-        sfx.star();
-        showToast(`解锁了${o.name}`);
-      } else {
-        showToast(`还差 ${o.cost - rewards.getStars()} 颗星星`);
-      }
-    };
-    grid.appendChild(card);
-  });
-}
-
 function openDress() {
   openSheet('dress-sheet');
-  renderOutfits();
+  document.body.classList.add('dressing');
+  dressCategory = 'top';
+  renderDress();
 }
 
 let homeworkSubject = '语文';
@@ -1946,18 +2013,16 @@ function renderStars() {
   const body = document.getElementById('star-body');
   if (!body) return;
   const stars = rewards.getStars();
+  const rows = CATEGORIES.map(cat => {
+    const list = ITEMS[cat.id] || [];
+    const owned = list.filter(item => rewards.isOwned(item.id)).length;
+    return `<div class="star-row"><span class="name">${cat.name}</span><span class="meta ${owned === list.length ? 'ok' : ''}">${owned}/${list.length}</span></div>`;
+  }).join('');
   body.innerHTML = `
     <div class="star-big">${stars} 颗星星</div>
     <p class="sheet-note">每天第一次打电话 +1，答对一道题 +1。</p>
-    <div class="star-list">
-      ${OUTFITS.map(o => {
-        const owned = rewards.hasOutfit(o.id);
-        return `<div class="star-row"><span class="name">${o.name}</span><span class="meta ${owned ? 'ok' : ''}">${
-          owned ? '已解锁' : `集齐 ${o.cost} 颗星星解锁`
-        }</span></div>`;
-      }).join('')}
-    </div>
-    <p class="sheet-note">今天作业完成 ${rewards.homeworkDoneCount()} / ${rewards.getDailyHomework().length}</p>`;
+    <div class="star-list">${rows}</div>
+    <p class="sheet-note">已解锁 ${rewards.ownedCount()} / ${rewards.totalCount()} 件装扮 ｜ 今天作业完成 ${rewards.homeworkDoneCount()} / ${rewards.getDailyHomework().length}</p>`;
 }
 
 function openStars() {
@@ -2001,7 +2066,7 @@ function initHome() {
   document.querySelectorAll('.sheet-close').forEach(btn => {
     btn.addEventListener('click', closeSheets);
   });
-  applyOutfit();
+  applyLook();
 
   // 眨眼
   let blinkTimer = setInterval(() => {
