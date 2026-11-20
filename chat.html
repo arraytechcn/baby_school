@@ -283,10 +283,16 @@
     background: linear-gradient(180deg, #242D40 0%, #2E3952 55%, #3A4664 100%);
     color: #F3E7D8;
   }
-  body.in-call #home { display: none; }
-  body:not(.in-call) #header,
-  body:not(.in-call) #history,
-  body:not(.in-call) #controls { visibility: hidden; }
+  body.chat-view #home { display: none; }
+  body:not(.chat-view) #header,
+  body:not(.chat-view) #history,
+  body:not(.chat-view) #controls { visibility: hidden; }
+  body.chat-view #controls { display: none; }
+  body.chat-view #hangup-btn { display: none; }
+  body:not(.chat-view) #live-bubble,
+  body:not(.chat-view) #record-banner { display: none !important; }
+  body.in-call .home-actions { display: none; }
+  body:not(.in-call) #call-panel { display: none; }
 
   .home-top { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px 0; }
   .home-hello { font-size: 22px; font-weight: 600; line-height: 1.3; }
@@ -429,6 +435,12 @@
   .ch-dress { fill: #F3A074; }
   .ch-collar { fill: #FFF7EC; }
   .ch-shoe { fill: #7A5C48; }
+  .ch-mouth-1, .ch-mouth-2 { display: none; }
+  #character.mouth-1 .ch-mouth-smile, #character.mouth-2 .ch-mouth-smile { display: none; }
+  #character.mouth-1 .ch-mouth-1 { display: block; }
+  #character.mouth-2 .ch-mouth-2 { display: block; }
+  #character.speaking svg { filter: drop-shadow(0 8px 20px rgba(255, 179, 126, 0.22)); }
+
   .ch-eye { transform-box: fill-box; transform-origin: center; transition: transform 0.09s ease; }
   .character.blink .ch-eye { transform: scaleY(0.12); }
   .ch-arm-wave { transform-box: view-box; transform-origin: 134px 172px; }
@@ -492,6 +504,56 @@
   }
   #home[data-theme="night"] .action.primary { background: #FFB37E; border-color: #FFB37E; color: #3B312A; }
 
+  /* 通话面板：直接叠在首页上 */
+  .call-panel {
+    flex: 0 0 auto;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 6px 18px calc(16px + env(safe-area-inset-bottom));
+  }
+  .call-transcript {
+    max-height: 26vh; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 2px 2px 4px;
+    scrollbar-width: thin;
+  }
+  .call-line { font-size: 15px; line-height: 1.55; }
+  .call-line b { font-weight: 600; margin-right: 5px; }
+  .call-line.kid { color: #4f6b86; text-align: right; }
+  .call-line.sister { color: #6b5648; }
+  #home[data-theme="night"] .call-line.kid { color: #A9C7E8; }
+  #home[data-theme="night"] .call-line.sister { color: #F0DFC9; }
+  .call-line.live { opacity: 0.7; }
+  .call-status { font-size: 12px; color: #a08b80; text-align: center; }
+  #home[data-theme="night"] .call-status { color: #B7A9B8; }
+  .call-buttons { display: flex; align-items: center; justify-content: center; gap: 26px; padding: 2px 0; }
+  .call-mic {
+    width: 82px; height: 82px; border-radius: 50%; border: none;
+    background: #ffb37e; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(255, 150, 90, 0.35);
+    cursor: pointer; touch-action: none;
+    transition: transform 0.12s, background 0.15s;
+  }
+  .call-mic svg { width: 36px; height: 36px; }
+  .call-mic.recording { background: #ff8a4d; transform: scale(1.08); }
+  .call-hangup {
+    width: 54px; height: 54px; border-radius: 50%; border: none;
+    background: #FBE3DC; color: #C4552F;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .call-hangup svg { width: 24px; height: 24px; }
+  .call-mic:active, .call-hangup:active { transform: scale(0.96); }
+
+  #chat-back {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    border: none; background: #F6E7D8; color: #8a6f5c;
+    display: none; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  #chat-back svg { width: 20px; height: 20px; }
+  body.chat-view #chat-back { display: flex; }
+
   #hangup-btn {
     width: 40px; height: 40px; border-radius: 50%;
     border: none; background: #FBE3DC; color: #C4552F;
@@ -532,6 +594,9 @@
           <svg viewBox="0 0 24 24" fill="#F5B75B" stroke="#EBA94B" stroke-width="1.2" stroke-linejoin="round"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/></svg>
           <b id="home-stars">0</b>
         </span>
+        <button class="icon-btn" id="home-chat" type="button" aria-label="对话记录" title="对话记录">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 8.8 8.8 0 0 1-3.6-.8L3 21l1.9-5.4a8.3 8.3 0 0 1-.9-3.8A8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/></svg>
+        </button>
         <button class="icon-btn" id="home-theme" type="button" aria-label="切换白天和夜晚" title="切换白天/夜晚">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg>
@@ -594,7 +659,9 @@
           </g>
           <ellipse cx="84" cy="107" rx="7" ry="4" fill="#FFC0B8" opacity="0.7"/>
           <ellipse cx="136" cy="107" rx="7" ry="4" fill="#FFC0B8" opacity="0.7"/>
-          <path d="M101 112 Q110 119 119 112" stroke="#c96f5e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <path class="ch-mouth-smile" d="M101 112 Q110 119 119 112" stroke="#c96f5e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <ellipse class="ch-mouth-1" cx="110" cy="115" rx="6" ry="3.5" fill="#c96f5e"/>
+          <ellipse class="ch-mouth-2" cx="110" cy="116" rx="7.5" ry="6.5" fill="#c96f5e"/>
         </svg>
       </div>
 
@@ -618,6 +685,23 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/></svg>
         星星奖励
       </button>
+    </div>
+
+    <div class="call-panel" id="call-panel">
+      <div class="call-transcript" id="call-transcript" aria-live="polite"></div>
+      <div class="call-status" id="call-status">按住说话</div>
+      <div class="call-buttons">
+        <button class="call-mic" id="call-mic" type="button" aria-label="按住说话">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="3" width="6" height="11" rx="3"/>
+            <path d="M5 11a7 7 0 0 0 14 0"/>
+            <path d="M12 18v3"/>
+          </svg>
+        </button>
+        <button class="call-hangup" id="call-hangup" type="button" aria-label="挂断">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14c5-3 11-3 16 0l-2.5 3C15.5 15.8 14 15.2 12 15.2s-3.5.6-5.5 1.8z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -713,6 +797,9 @@
   </div>
 
   <div id="header">
+    <button id="chat-back" type="button" aria-label="返回首页">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
     <div id="avatar">
       <svg viewBox="58 52 84 84" xmlns="http://www.w3.org/2000/svg">
         <path d="M45 130 C38 70 60 30 100 30 C140 30 162 70 155 130 L150 175 C130 165 120 150 118 132 L82 132 C80 150 70 165 50 175 Z" fill="#8a6844"/>
@@ -796,6 +883,11 @@ function setMouth(f) {
   avatar.querySelector('.mouth-smile').style.display = f === 0 ? '' : 'none';
   avatar.querySelector('.mouth-open1').style.display = f === 1 ? '' : 'none';
   avatar.querySelector('.mouth-open2').style.display = f === 2 ? '' : 'none';
+  const ch = document.getElementById('character');
+  if (ch) {
+    ch.classList.toggle('mouth-1', f === 1);
+    ch.classList.toggle('mouth-2', f === 2);
+  }
 }
 function startBlink() {
   clearInterval(blinkTimer);
@@ -837,15 +929,27 @@ function showToast(msg) {
 /* ---------- 说话（TTS + 口型 + 表情） ---------- */
 async function speak(text, mood = 'idle') {
   setMood(mood);
+  const ch = document.getElementById('character');
+  if (document.body.classList.contains('in-call')) setCallStatus('姐姐在说…');
   await tts.speak(text, {
-    onStart() { avatar.classList.add('speaking'); },
+    onStart() {
+      avatar.classList.add('speaking');
+      if (ch) ch.classList.add('speaking');
+    },
     onMouth(f) { setMouth(f); },
     onEnd() {
       avatar.classList.remove('speaking');
+      if (ch) ch.classList.remove('speaking');
       setMouth(0);
       setTimeout(() => setMood('idle'), 200);
+      if (document.body.classList.contains('in-call') && !document.body.classList.contains('recording') && !pressing) {
+        setCallStatus('按住说话');
+      }
     },
-    onFallback() { showToast('小星姐姐嗓子有点哑，我们看她写字吧'); },
+    onFallback() {
+      showToast('小星姐姐嗓子有点哑，我们看她写字吧');
+      if (document.body.classList.contains('in-call')) setCallStatus('按住说话');
+    },
   });
 }
 
@@ -854,8 +958,10 @@ async function handleKidInput(text) {
   if (busy || !text.trim()) return;
   busy = true;
   setMood('thinking');
+  if (document.body.classList.contains('in-call')) setCallStatus('姐姐在想…');
   const r = await replySmart(text);
-  addBubble(r.text, 'sister');
+  if (document.body.classList.contains('in-call')) transcriptAdd('sister', r.text);
+  else addBubble(r.text, 'sister');
   await speak(r.text, r.mood);
   busy = false;
 }
@@ -864,6 +970,8 @@ async function handleKidInput(text) {
 let pressing = false;
 let pressStartAt = 0;
 let secTimer = null;   // 录音秒数
+let pressingBtn = null; // 当前按住的麦克风
+let liveLine = null;    // 通话字幕里的实时行
 const liveBubble = document.getElementById('live-bubble');
 
 function startSecCounter() {
@@ -878,36 +986,51 @@ function stopSecCounter() { clearInterval(secTimer); }
 async function onPressStart(e) {
   e.preventDefault();
   if (pressing) return;
+  if (!document.body.classList.contains('in-call')) return;
   if (!asr.supported || !asr.hasKey) {
     showToast(!asr.supported ? '这个浏览器不支持语音' : '还没有配置 API Key');
     return;
   }
   pressing = true;
   pressStartAt = Date.now();
+  const btn = e.currentTarget;
+  pressingBtn = btn;
   // 把手指/鼠标锁定在按钮上：滑出按钮边缘也算按着，只有真正抬手才结束
-  try { micBtn.setPointerCapture(e.pointerId); } catch {}
+  try { btn.setPointerCapture(e.pointerId); } catch {}
   tts.stop();                       // 孩子说话时姐姐立即安静
   avatar.classList.remove('speaking');
+  const ch = document.getElementById('character');
+  if (ch) ch.classList.remove('speaking');
   setMouth(0);
   busy = false;                     // 打断进行中的回复
+  setCallStatus('正在听你说…');
 
-  // 麦克风上方的实时气泡立即出现
+  // 通话字幕里先占一行，边说边更新
+  liveLine = transcriptAdd('kid', '正在听…');
+  if (liveLine) liveLine.classList.add('live');
   liveBubble.textContent = '正在听…';
   liveBubble.classList.add('live');
 
   const ok = await asr.startLive(
-    text => { liveBubble.textContent = sanitize(text); liveBubble.classList.remove('live'); },
+    text => {
+      const safe = sanitize(text);
+      if (liveLine) transcriptSetText(liveLine, safe);
+      liveBubble.textContent = safe;
+      liveBubble.classList.remove('live');
+    },
     () => { showToast('说得有点长哦，先到这里~'); onPressEnd(); }
   );
   if (!ok) {
     pressing = false;
     document.body.classList.remove('recording');
-    micBtn.classList.remove('recording');
+    if (btn) btn.classList.remove('recording');
     stopSecCounter();
+    if (liveLine) { liveLine.remove(); liveLine = null; }
+    setCallStatus('按住说话');
     showToast('麦克风打不开，请检查权限');
     return;
   }
-  micBtn.classList.add('recording');
+  if (btn) btn.classList.add('recording');
   document.body.classList.add('recording');
   startSecCounter();
 }
@@ -915,23 +1038,38 @@ async function onPressStart(e) {
 async function onPressEnd() {
   if (!pressing) return;
   pressing = false;
-  micBtn.classList.remove('recording');
+  const btn = pressingBtn;
+  pressingBtn = null;
+  if (btn) btn.classList.remove('recording');
   document.body.classList.remove('recording');
   stopSecCounter();
+  setCallStatus('正在识别…');
   const text = await asr.stopLive();
   liveBubble.textContent = '正在识别…';
   if (!text) {
+    if (liveLine) { liveLine.remove(); liveLine = null; }
+    setCallStatus('按住说话');
     // 按得太短（误触）只提示不播语音；认真说了但没识别出来才播"没听清"
     if (Date.now() - pressStartAt < 1500) {
       showToast('按住按钮再说话哦');
     } else {
-      await speak('小星姐姐没听清，你可以再说一次吗？', 'thinking');
+      const prompt = '小星姐姐没听清，你可以再说一次吗？';
+      if (document.body.classList.contains('in-call')) transcriptAdd('sister', prompt);
+      await speak(prompt, 'thinking');
     }
     return;
   }
   const safeText = sanitize(text);
-  const b = addBubble(safeText, 'kid');
-  b.onclick = () => speak(safeText); // 点击朗读，辅助识字
+  if (liveLine) {
+    transcriptSetText(liveLine, safeText);
+    liveLine.classList.remove('live');
+    liveLine = null;
+  } else if (document.body.classList.contains('in-call')) {
+    transcriptAdd('kid', safeText);
+  } else {
+    const b = addBubble(safeText, 'kid');
+    b.onclick = () => speak(safeText);
+  }
   await handleKidInput(safeText);
 }
 
@@ -939,6 +1077,14 @@ micBtn.addEventListener('pointerdown', onPressStart);
 micBtn.addEventListener('pointerup', onPressEnd);
 micBtn.addEventListener('pointercancel', onPressEnd);
 micBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+const callMic = document.getElementById('call-mic');
+if (callMic) {
+  callMic.addEventListener('pointerdown', onPressStart);
+  callMic.addEventListener('pointerup', onPressEnd);
+  callMic.addEventListener('pointercancel', onPressEnd);
+  callMic.addEventListener('contextmenu', e => e.preventDefault());
+}
 
 /* ---------- 首页：状态、场景、四个入口 ---------- */
 const THEME_KEY = 'xjx_theme';
@@ -1028,6 +1174,7 @@ function awardDailyStar() {
 }
 
 function showHomeLine() {
+  if (document.body.classList.contains('in-call')) return;
   const character = document.getElementById('character');
   const bubble = document.getElementById('home-bubble');
   if (!character || !bubble) return;
@@ -1040,24 +1187,61 @@ function showHomeLine() {
   bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 2600);
 }
 
+function setCallStatus(text) {
+  const el = document.getElementById('call-status');
+  if (el) el.textContent = text;
+}
+
+function transcriptAdd(who, text) {
+  const box = document.getElementById('call-transcript');
+  if (!box) return null;
+  const line = document.createElement('div');
+  line.className = 'call-line ' + who;
+  const label = document.createElement('b');
+  label.textContent = who === 'kid' ? '你' : '姐姐';
+  line.appendChild(label);
+  line.appendChild(document.createTextNode(text));
+  box.appendChild(line);
+  if (who === 'sister') line.scrollIntoView({ block: 'start' });
+  else box.scrollTop = box.scrollHeight;
+  return line;
+}
+
+function transcriptSetText(line, text) {
+  if (!line) return;
+  if (line.lastChild && line.lastChild.nodeType === 3) line.lastChild.nodeValue = text;
+  else line.appendChild(document.createTextNode(text));
+  const box = document.getElementById('call-transcript');
+  if (box) box.scrollTop = box.scrollHeight;
+}
+
+function transcriptClear() {
+  const box = document.getElementById('call-transcript');
+  if (box) box.innerHTML = '';
+}
+
 function startCall() {
   if (document.body.classList.contains('in-call')) return;
   document.body.classList.add('in-call');
+  transcriptClear();
+  setCallStatus('按住说话');
   tts.stop();
   if (!greeted) {
     greeted = true;
     const g = greeting();
-    addBubble(g, 'sister');
+    transcriptAdd('sister', g);
     awardDailyStar();
     setTimeout(() => speak(g, 'happy'), 80);
+  } else {
+    transcriptAdd('sister', '我在呢，想聊什么都可以。');
   }
-  historyEl.scrollTop = historyEl.scrollHeight;
 }
 
 function exitCall() {
   tts.stop();
   document.body.classList.remove('in-call');
   setMood('idle');
+  setCallStatus('按住说话');
   renderHome();
 }
 
@@ -1065,8 +1249,18 @@ function initHome() {
   const home = document.getElementById('home');
   const character = document.getElementById('character');
   document.getElementById('call-btn').onclick = startCall;
+  document.getElementById('call-hangup').onclick = exitCall;
   document.getElementById('hangup-btn').onclick = exitCall;
   document.getElementById('home-settings').onclick = openGate;
+  document.getElementById('home-chat').onclick = () => {
+    if (document.body.classList.contains('in-call')) exitCall();
+    document.body.classList.add('chat-view');
+    historyEl.scrollTop = historyEl.scrollHeight;
+  };
+  document.getElementById('chat-back').onclick = () => {
+    document.body.classList.remove('chat-view');
+    renderHome();
+  };
   document.getElementById('home-theme').onclick = () => {
     const next = home.dataset.theme === 'night' ? 'day' : 'night';
     try { localStorage.setItem(THEME_KEY, next); } catch {}
@@ -1084,7 +1278,7 @@ function initHome() {
 
   // 眨眼
   let blinkTimer = setInterval(() => {
-    if (!character || document.body.classList.contains('in-call')) return;
+    if (!character || document.body.classList.contains('chat-view')) return;
     character.classList.add('blink');
     setTimeout(() => character.classList.remove('blink'), 150);
   }, 3800);
