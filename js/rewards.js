@@ -1,5 +1,5 @@
 /**
- * rewards.js — 星星、服装、每日任务
+ * rewards.js — 星星、服装、每日作业
  *
  * V1 存在 localStorage；后续接 SQLite 时替换这一层即可。
  * 星星是成长值，不是消耗品：集齐门槛即解锁服装，不扣星星。
@@ -7,7 +7,7 @@
 const STARS_KEY = 'xjx_stars';
 const OUTFITS_KEY = 'xjx_outfits';
 const OUTFIT_KEY = 'xjx_outfit';
-const TASKS_KEY = 'xjx_tasks';
+const HOMEWORK_KEY = 'xjx_homework';
 
 export const OUTFITS = [
   { id: 'daily', name: '日常裙', cost: 0, color: '#F3A074' },
@@ -16,21 +16,34 @@ export const OUTFITS = [
   { id: 'festival', name: '节日裙', cost: 10, color: '#E7B36A' },
 ];
 
-const TASK_BANK = {
-  '数学': [
-    { id: 'm1', subject: '数学', q: '3 加 4 等于几？', options: ['6', '7', '8'], answer: 1 },
-    { id: 'm2', subject: '数学', q: '10 减 6 等于几？', options: ['3', '4', '5'], answer: 1 },
-    { id: 'm3', subject: '数学', q: '5 加 5 等于几？', options: ['10', '11', '9'], answer: 0 },
-  ],
+export const SUBJECTS = ['语文', '数学', '英语'];
+export const PER_SUBJECT = 2;
+
+// 二年级水平：语文认字/词语，数学加减与乘法口诀，英语常见词
+const HOMEWORK_BANK = {
   '语文': [
     { id: 'c1', subject: '语文', q: '“小兔子”的“兔”读什么？', options: ['tù', 'tǔ', 'dù'], answer: 0 },
     { id: 'c2', subject: '语文', q: '“太阳”的“阳”是什么结构？', options: ['左右结构', '上下结构', '独体字'], answer: 0 },
-    { id: 'c3', subject: '语文', q: '下面哪个词是形容开心的？', options: ['高兴', '生气', '难过'], answer: 0 },
+    { id: 'c3', subject: '语文', q: '哪个词和“高兴”意思最接近？', options: ['生气', '难过', '开心'], answer: 2 },
+    { id: 'c4', subject: '语文', q: '“大”的反义词是什么？', options: ['多', '小', '高'], answer: 1 },
+    { id: 'c5', subject: '语文', q: '“苹果”的“苹”是什么结构？', options: ['左右结构', '上下结构', '独体字'], answer: 1 },
+    { id: 'c6', subject: '语文', q: '“小鸟”用哪个量词？', options: ['一条', '一只', '一头'], answer: 1 },
+  ],
+  '数学': [
+    { id: 'm1', subject: '数学', q: '7 加 8 等于几？', options: ['14', '15', '16'], answer: 1 },
+    { id: 'm2', subject: '数学', q: '15 减 9 等于几？', options: ['5', '6', '7'], answer: 1 },
+    { id: 'm3', subject: '数学', q: '3 乘 4 等于几？', options: ['12', '7', '9'], answer: 0 },
+    { id: 'm4', subject: '数学', q: '24 加 6 等于几？', options: ['28', '30', '32'], answer: 1 },
+    { id: 'm5', subject: '数学', q: '5 乘 2 等于几？', options: ['7', '10', '12'], answer: 1 },
+    { id: 'm6', subject: '数学', q: '18 减 7 等于几？', options: ['9', '10', '11'], answer: 2 },
   ],
   '英语': [
     { id: 'e1', subject: '英语', q: '“苹果”用英语怎么说？', options: ['apple', 'banana', 'orange'], answer: 0 },
     { id: 'e2', subject: '英语', q: '“cat”是什么小动物？', options: ['猫', '狗', '兔子'], answer: 0 },
-    { id: 'e3', subject: '英语', q: '“red”是什么颜色？', options: ['红色', '蓝色', '绿色'], answer: 0 },
+    { id: 'e3', subject: '英语', q: '“red”是什么颜色？', options: ['蓝色', '绿色', '红色'], answer: 2 },
+    { id: 'e4', subject: '英语', q: '“book”是什么意思？', options: ['书', '笔', '桌子'], answer: 0 },
+    { id: 'e5', subject: '英语', q: '“two”是数字几？', options: ['1', '2', '3'], answer: 1 },
+    { id: 'e6', subject: '英语', q: '“Good morning”是什么意思？', options: ['晚安', '早上好', '再见'], answer: 1 },
   ],
 };
 
@@ -52,13 +65,18 @@ function write(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
 
-function pickDailyTasks() {
+function pickDailyHomework() {
   const d = new Date();
   const seed = d.getDate() + (d.getMonth() + 1) * 31;
-  return ['数学', '语文', '英语'].map((subject, i) => {
-    const list = TASK_BANK[subject];
-    return list[(seed + i) % list.length];
+  const out = [];
+  SUBJECTS.forEach((subject, si) => {
+    const list = HOMEWORK_BANK[subject];
+    const start = (seed + si * 3) % list.length;
+    for (let i = 0; i < PER_SUBJECT; i++) {
+      out.push(list[(start + i) % list.length]);
+    }
   });
+  return out;
 }
 
 export const rewards = {
@@ -102,28 +120,28 @@ export const rewards = {
     if (OUTFITS.some(o => o.id === id)) write(OUTFIT_KEY, id);
   },
 
-  getDailyTasks() {
-    return pickDailyTasks();
+  getDailyHomework() {
+    return pickDailyHomework();
   },
-  getTaskState() {
-    const st = read(TASKS_KEY, null);
+  getHomeworkState() {
+    const st = read(HOMEWORK_KEY, null);
     if (!st || st.day !== dayStamp() || !Array.isArray(st.done)) {
       return { day: dayStamp(), done: [] };
     }
     return { day: st.day, done: st.done };
   },
-  completeTask(id) {
-    const st = this.getTaskState();
+  completeHomework(id) {
+    const st = this.getHomeworkState();
     if (!st.done.includes(id)) {
       st.done.push(id);
-      write(TASKS_KEY, st);
+      write(HOMEWORK_KEY, st);
       this.addStars(1);
     }
-    return this.getTaskState();
+    return this.getHomeworkState();
   },
-  tasksDoneCount() {
-    const tasks = this.getDailyTasks();
-    const st = this.getTaskState();
-    return tasks.filter(t => st.done.includes(t.id)).length;
+  homeworkDoneCount() {
+    const all = this.getDailyHomework();
+    const st = this.getHomeworkState();
+    return all.filter(t => st.done.includes(t.id)).length;
   },
 };

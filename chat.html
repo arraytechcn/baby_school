@@ -228,6 +228,16 @@
     flex: 1; min-width: 180px; outline: none; user-select: text;
   }
   #settings-panel input[type=text]:focus, #settings-panel input[type=password]:focus { border-color: #ffb37e; }
+  #settings-panel input[type=number] {
+    font-size: 15px; padding: 9px 12px; width: 90px;
+    border: 2px solid #f0dcc8; border-radius: 12px;
+    background: #FFF8F0; color: #5a4a42; font-family: inherit; outline: none;
+  }
+  #settings-panel select {
+    font-size: 15px; padding: 9px 12px;
+    border: 2px solid #f0dcc8; border-radius: 12px;
+    background: #FFF8F0; color: #5a4a42; font-family: inherit; outline: none;
+  }
   #settings-panel input[type=range] {
     -webkit-appearance: none; appearance: none;
     width: 130px; height: 22px; background: transparent; cursor: pointer;
@@ -296,8 +306,11 @@
 
   .home-top { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px 0; }
   .home-hello { font-size: 22px; font-weight: 600; line-height: 1.3; }
-  .home-date { font-size: 12.5px; color: #a08b80; margin-top: 2px; }
-  #home[data-theme="night"] .home-date { color: #B7A9B8; }
+  .home-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #a08b80; padding: 2px 20px 0; }
+  .home-profile { color: #A8471F; font-weight: 600; }
+  .meta-dot { color: #C9B3A3; }
+  #home[data-theme="night"] .home-meta { color: #B7A9B8; }
+  #home[data-theme="night"] .home-profile { color: #F0C9A8; }
 
   .home-stats { margin-left: auto; display: flex; align-items: center; gap: 4px; }
   .stat {
@@ -576,7 +589,7 @@
     .character.wave .ch-arm-wave { animation: none; }
   }
 
-  /* ---------- 换装 / 每日任务 / 星星奖励 ---------- */
+  /* ---------- 换装 / 每日作业 / 星星奖励 ---------- */
   .sheet {
     position: fixed; inset: 0; z-index: 32;
     display: none; align-items: flex-end; justify-content: center;
@@ -616,6 +629,14 @@
   }
   .outfit-name { font-size: 15px; font-weight: 600; }
   .outfit-meta { font-size: 12px; color: #a08b80; }
+  .hw-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  .hw-tab {
+    flex: 1; min-height: 38px; border-radius: 12px;
+    border: 1px solid #F0DCC8; background: #fff; color: #8a6f5c;
+    font: inherit; font-size: 13.5px; cursor: pointer;
+  }
+  .hw-tab.active { border-color: #FFB37E; background: #FFF3E0; color: #A8471F; font-weight: 600; }
+  .hw-tab.done { color: #5E7C62; }
   .task-progress { display: flex; gap: 6px; margin: 2px 0 12px; }
   .task-dot { width: 8px; height: 8px; border-radius: 50%; background: #E6D8C5; }
   .task-dot.done { background: #FFB37E; }
@@ -666,7 +687,6 @@
     <header class="home-top">
       <div>
         <div class="home-hello" id="home-hello">晚上好</div>
-        <div class="home-date" id="home-date"></div>
       </div>
       <div class="home-stats">
         <span class="stat" title="星星">
@@ -688,6 +708,12 @@
         </button>
       </div>
     </header>
+
+    <div class="home-meta">
+      <span class="home-profile" id="home-profile">7 岁 · 二年级</span>
+      <span class="meta-dot">·</span>
+      <span id="home-date"></span>
+    </div>
 
     <div class="home-usage">
       <div class="usage-track"><i class="usage-fill" id="usage-fill"></i></div>
@@ -765,7 +791,7 @@
       </button>
       <button class="action" id="task-btn" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg>
-        今日任务
+        今日作业
       </button>
       <button class="action" id="star-btn" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/></svg>
@@ -828,6 +854,24 @@
         </div>
 
         <div class="set-sec">
+          <h3>孩子档案</h3>
+          <div class="set-card">
+            <div class="set-row">
+              <label class="set-label">年龄 <input type="number" id="set-age" min="3" max="12" step="1"></label>
+              <label class="set-label">年级
+                <select id="set-grade">
+                  <option>一年级</option>
+                  <option>二年级</option>
+                  <option>三年级</option>
+                  <option>四年级</option>
+                </select>
+              </label>
+            </div>
+            <div class="set-sub" style="margin-top:8px;">显示在首页顶部；作业按二年级水平出题。</div>
+          </div>
+        </div>
+
+        <div class="set-sec">
           <h3>记忆库</h3>
           <div class="set-card">
             <div class="set-row"><span class="set-sub" id="set-db">检查中…</span></div>
@@ -882,7 +926,7 @@
     </div>
   </div>
 
-  <!-- 换装 / 每日任务 / 星星奖励 -->
+  <!-- 换装 / 每日作业 / 星星奖励 -->
   <div class="sheet" id="dress-sheet" aria-hidden="true">
     <div class="sheet-card">
       <div class="sheet-head"><h3>换装</h3><button class="sheet-close" type="button" data-close="dress-sheet" aria-label="关闭">✕</button></div>
@@ -893,7 +937,7 @@
 
   <div class="sheet" id="task-sheet" aria-hidden="true">
     <div class="sheet-card">
-      <div class="sheet-head"><h3>今日任务</h3><button class="sheet-close" type="button" data-close="task-sheet" aria-label="关闭">✕</button></div>
+      <div class="sheet-head"><h3>今日作业</h3><button class="sheet-close" type="button" data-close="task-sheet" aria-label="关闭">✕</button></div>
       <div id="task-body"></div>
     </div>
   </div>
@@ -971,7 +1015,7 @@ import { replySmart, greeting, sanitize } from './js/brain.js';
 import { getParentConfig, setParentConfig } from './js/qwen.js';
 import { store } from './js/store.js';
 import { memory } from './js/memory.js';
-import { rewards, OUTFITS } from './js/rewards.js';
+import { rewards, OUTFITS, SUBJECTS, PER_SUBJECT } from './js/rewards.js';
 
 const avatar = document.getElementById('avatar');
 const historyEl = document.getElementById('history');
@@ -1264,11 +1308,16 @@ function renderHome() {
   const name = memory.name ? '，' + memory.name : '';
   const helloEl = document.getElementById('home-hello');
   const dateEl = document.getElementById('home-date');
+  const cfg = getParentConfig();
+  const age = Number(cfg.childAge) || 7;
+  const grade = cfg.childGrade || '二年级';
+  const profileEl = document.getElementById('home-profile');
+  if (profileEl) profileEl.textContent = `${age} 岁 · ${grade}`;
   if (helloEl) helloEl.textContent = hello + name;
   if (dateEl) {
     dateEl.textContent = new Date().toLocaleDateString('zh-CN', {
       month: 'long', day: 'numeric', weekday: 'short',
-    });
+    }).replace('日周', '日 周');
   }
   setStars(getStars());
   renderUsage();
@@ -1419,36 +1468,69 @@ function openDress() {
   renderOutfits();
 }
 
-function renderTasks() {
+let homeworkSubject = '语文';
+
+function subjectQuestions(subject, tasks) {
+  return tasks.filter(t => t.subject === subject);
+}
+
+function subjectDone(subject, tasks, done) {
+  return subjectQuestions(subject, tasks).filter(t => done.has(t.id)).length;
+}
+
+function renderHomework() {
   const body = document.getElementById('task-body');
   if (!body) return;
-  const tasks = rewards.getDailyTasks();
-  const state = rewards.getTaskState();
+  const tasks = rewards.getDailyHomework();
+  const state = rewards.getHomeworkState();
   const done = new Set(state.done);
   if (done.size >= tasks.length) {
-    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>今天的任务都完成啦，明天再来找姐姐吧。</p></div>`;
+    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>今天的作业都完成啦，明天再来找姐姐吧。</p></div>`;
     return;
   }
-  const q = tasks.find(t => !done.has(t.id));
+  const incomplete = SUBJECTS.filter(s => subjectDone(s, tasks, done) < PER_SUBJECT);
+  if (!incomplete.includes(homeworkSubject)) homeworkSubject = incomplete[0];
+  const q = subjectQuestions(homeworkSubject, tasks).find(t => !done.has(t.id));
+  if (!q) {
+    homeworkSubject = incomplete[0];
+    renderHomework();
+    return;
+  }
+  const tabs = SUBJECTS.map(s => {
+    const n = subjectDone(s, tasks, done);
+    return `<button class="hw-tab ${s === homeworkSubject ? 'active' : ''} ${n >= PER_SUBJECT ? 'done' : ''}" type="button" data-subject="${s}">${s} ${n}/${PER_SUBJECT}</button>`;
+  }).join('');
   body.innerHTML = `
+    <div class="hw-tabs">${tabs}</div>
     <div class="task-progress">${tasks.map(t => `<i class="task-dot ${done.has(t.id) ? 'done' : ''}"></i>`).join('')}</div>
-    <span class="task-subject">${q.subject}</span>
+    <span class="task-subject">${q.subject} · 第 ${subjectDone(q.subject, tasks, done) + 1} 题</span>
     <div class="task-q">${q.q}</div>
     <div class="task-options">${q.options.map((o, i) => `<button class="task-opt" type="button" data-i="${i}">${o}</button>`).join('')}</div>
-    <p class="sheet-note">答对一题得 1 颗星星，答错不扣星星。</p>`;
+    <p class="sheet-note">答对一题得 1 颗星星，答错不扣星星。今天共 ${tasks.length} 题。</p>`;
+  body.querySelectorAll('.hw-tab').forEach(btn => {
+    btn.onclick = () => {
+      const subject = btn.dataset.subject;
+      if (subjectDone(subject, tasks, done) >= PER_SUBJECT) {
+        showToast(`${subject}写完啦`);
+        return;
+      }
+      homeworkSubject = subject;
+      renderHomework();
+    };
+  });
   body.querySelectorAll('.task-opt').forEach(btn => {
-    btn.onclick = () => answerTask(q, Number(btn.dataset.i), btn);
+    btn.onclick = () => answerHomework(q, Number(btn.dataset.i), btn);
   });
   speak(q.q, 'thinking');
 }
 
-function answerTask(q, i, btn) {
+function answerHomework(q, i, btn) {
   if (i === q.answer) {
-    rewards.completeTask(q.id);
+    rewards.completeHomework(q.id);
     sfx.star();
     setStars(getStars());
     showToast('答对啦，得到一颗星星');
-    renderTasks();
+    renderHomework();
   } else {
     showToast('再想想，姐姐觉得你可以的');
     if (btn) {
@@ -1458,9 +1540,13 @@ function answerTask(q, i, btn) {
   }
 }
 
-function openTasks() {
+function openHomework() {
+  const tasks = rewards.getDailyHomework();
+  const done = new Set(rewards.getHomeworkState().done);
+  const next = SUBJECTS.find(subject => subjectQuestions(subject, tasks).some(t => !done.has(t.id)));
+  if (next) homeworkSubject = next;
   openSheet('task-sheet');
-  renderTasks();
+  renderHomework();
 }
 
 function renderStars() {
@@ -1478,7 +1564,7 @@ function renderStars() {
         }</span></div>`;
       }).join('')}
     </div>
-    <p class="sheet-note">今天任务完成 ${rewards.tasksDoneCount()} / 3</p>`;
+    <p class="sheet-note">今天作业完成 ${rewards.homeworkDoneCount()} / ${rewards.getDailyHomework().length}</p>`;
 }
 
 function openStars() {
@@ -1514,7 +1600,7 @@ function initHome() {
     });
   }
   document.getElementById('dress-btn').onclick = openDress;
-  document.getElementById('task-btn').onclick = openTasks;
+  document.getElementById('task-btn').onclick = openHomework;
   document.getElementById('star-btn').onclick = openStars;
   document.querySelectorAll('.sheet').forEach(sheet => {
     sheet.addEventListener('click', e => { if (e.target === sheet) closeSheets(); });
@@ -1677,6 +1763,14 @@ function renderVoices() {
 }
 
 /* 语音参数 */
+function syncProfile() {
+  const cfg = getParentConfig();
+  const ageEl = document.getElementById('set-age');
+  const gradeEl = document.getElementById('set-grade');
+  if (ageEl) ageEl.value = Number(cfg.childAge) || 7;
+  if (gradeEl) gradeEl.value = cfg.childGrade || '二年级';
+}
+
 function syncSliders() {
   document.getElementById('set-rate').value = tts.rate;
   document.getElementById('set-rate-v').textContent = tts.rate.toFixed(2);
@@ -1700,6 +1794,21 @@ document.getElementById('set-sfx').oninput = e => {
   document.getElementById('set-sfx-v').textContent = (+e.target.value).toFixed(2);
 };
 document.getElementById('set-tts-on').onchange = e => tts.setEnabled(e.target.checked);
+
+document.getElementById('set-age').onchange = e => {
+  const v = Math.min(12, Math.max(3, parseInt(e.target.value, 10) || 7));
+  e.target.value = v;
+  parentCfg.childAge = v;
+  setParentConfig(parentCfg);
+  renderHome();
+  log('孩子年龄: ' + v);
+};
+document.getElementById('set-grade').onchange = e => {
+  parentCfg.childGrade = e.target.value;
+  setParentConfig(parentCfg);
+  renderHome();
+  log('孩子年级: ' + e.target.value);
+};
 
 /* API Key */
 document.getElementById('set-key-save').onclick = () => {
@@ -1767,6 +1876,7 @@ function openSettingsPanel() {
   gatePass.value = '';
   parentCfg = getParentConfig();
   showEngine();
+  syncProfile();
   syncSliders();
   renderAll();
   renderVoices();
