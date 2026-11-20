@@ -80,9 +80,11 @@
   /* ---------- 底部操作栏 ---------- */
   #controls {
     flex: 0 0 auto;
-    display: flex; align-items: center; justify-content: center;
-    padding: 12px 16px 24px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px;
+    padding: 12px 16px 20px;
   }
+  .mic-hint { font-size: 12px; color: #a08b80; letter-spacing: 0.02em; }
   #mic-btn {
     width: 88px; height: 88px; border-radius: 50%;
     border: none; cursor: pointer; flex-shrink: 0;
@@ -762,6 +764,7 @@
         <path d="M12 18v3"/>
       </svg>
     </button>
+    <div class="mic-hint">按住说话 · 姐姐说话时也可以按住打断</div>
   </div>
 
 <script type="module">
