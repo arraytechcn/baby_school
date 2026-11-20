@@ -1839,11 +1839,11 @@ function renderHomework() {
   stopDrawVoice();
   const body = document.getElementById('task-body');
   if (!body) return;
-  const tasks = rewards.getDailyHomework();
+  const tasks = rewards.getCurrentHomework();
   const state = rewards.getHomeworkState();
   const done = new Set(state.done);
   if (done.size >= tasks.length) {
-    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>今天的作业都完成啦，明天再来找姐姐吧。</p></div>`;
+    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>这一套写完啦！还想练的话，再点一次「今日作业」就有新题目。</p></div>`;
     return;
   }
   const incomplete = SUBJECTS.filter(subject => subjectDone(subject, tasks, done) < subjectQuota(subject));
@@ -1854,7 +1854,7 @@ function renderHomework() {
     q = subjectQuestions(homeworkSubject, tasks).find(t => !done.has(t.id));
   }
   if (!q) {
-    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>今天的作业都完成啦，明天再来找姐姐吧。</p></div>`;
+    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>这一套写完啦！还想练的话，再点一次「今日作业」就有新题目。</p></div>`;
     return;
   }
   const tabs = SUBJECTS.map(subject => {
@@ -1906,7 +1906,7 @@ function renderHomework() {
   body.innerHTML = `${head}
     <div class="task-q">${q.q}</div>
     <div class="task-options">${q.options.map((o, i) => `<button class="task-opt" type="button" data-i="${i}">${o}</button>`).join('')}</div>
-    <p class="sheet-note">答对一题得 1 颗星星，答错不扣星星。今天共 ${tasks.length} 题。</p>`;
+    <p class="sheet-note">答对一题得 1 颗星星，答错不扣星星。这一套共 ${tasks.length} 题。</p>`;
   wireTabs();
   body.querySelectorAll('.task-opt').forEach(btn => {
     btn.onclick = () => answerHomework(q, Number(btn.dataset.i), btn);
@@ -2066,9 +2066,9 @@ function answerHomework(q, i, btn) {
 
 function openHomework() {
   tts.warmup();
-  const tasks = rewards.getDailyHomework();
-  const done = new Set(rewards.getHomeworkState().done);
-  const next = SUBJECTS.find(subject => subjectQuestions(subject, tasks).some(t => !done.has(t.id)));
+  rewards.startHomeworkSession();
+  const tasks = rewards.getCurrentHomework();
+  const next = SUBJECTS.find(subject => subjectQuestions(subject, tasks).length > 0);
   if (next) homeworkSubject = next;
   openSheet('task-sheet');
   renderHomework();
@@ -2087,7 +2087,7 @@ function renderStars() {
     <div class="star-big">${stars} 颗星星</div>
     <p class="sheet-note">每天第一次打电话 +1，答对一道题 +1。</p>
     <div class="star-list">${rows}</div>
-    <p class="sheet-note">已解锁 ${rewards.ownedCount()} / ${rewards.totalCount()} 件装扮 ｜ 今天作业完成 ${rewards.homeworkDoneCount()} / ${rewards.getDailyHomework().length}</p>`;
+    <p class="sheet-note">已解锁 ${rewards.ownedCount()} / ${rewards.totalCount()} 件装扮 ｜ 今天作业得星 ${rewards.homeworkEarned()}</p>`;
 }
 
 function openStars() {

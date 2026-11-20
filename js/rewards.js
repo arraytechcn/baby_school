@@ -5,6 +5,11 @@
  * 星星是成长值，不是消耗品：集齐门槛即解锁，不扣星星。
  * V1 存在 localStorage；后续接 SQLite 时替换这一层即可。
  */
+import { SUBJECTS, PER_SUBJECT, pickHomeworkSet } from './homework.js';
+export { SUBJECTS, PER_SUBJECT };
+
+let currentHomework = null;
+
 const STARS_KEY = 'xjx_stars';
 const ITEMS_KEY = 'xjx_items';
 const LOOK_KEY = 'xjx_look';
@@ -81,42 +86,6 @@ function migrateLook() {
   return null;
 }
 
-export const SUBJECTS = ['语文', '数学', '英语', '画画'];
-export const PER_SUBJECT = { '语文': 2, '数学': 2, '英语': 2, '画画': 1 };
-
-// 二年级水平：语文认字/词语，数学加减与乘法口诀，英语常见词
-const HOMEWORK_BANK = {
-  '语文': [
-    { id: 'c1', subject: '语文', q: '“小兔子”的“兔”读什么？', options: ['tù', 'tǔ', 'dù'], answer: 0 },
-    { id: 'c2', subject: '语文', q: '“太阳”的“阳”是什么结构？', options: ['左右结构', '上下结构', '独体字'], answer: 0 },
-    { id: 'c3', subject: '语文', q: '哪个词和“高兴”意思最接近？', options: ['生气', '难过', '开心'], answer: 2 },
-    { id: 'c4', subject: '语文', q: '“大”的反义词是什么？', options: ['多', '小', '高'], answer: 1 },
-    { id: 'c5', subject: '语文', q: '“苹果”的“苹”是什么结构？', options: ['左右结构', '上下结构', '独体字'], answer: 1 },
-    { id: 'c6', subject: '语文', q: '“小鸟”用哪个量词？', options: ['一条', '一只', '一头'], answer: 1 },
-  ],
-  '数学': [
-    { id: 'm1', subject: '数学', q: '7 加 8 等于几？', options: ['14', '15', '16'], answer: 1 },
-    { id: 'm2', subject: '数学', q: '15 减 9 等于几？', options: ['5', '6', '7'], answer: 1 },
-    { id: 'm3', subject: '数学', q: '3 乘 4 等于几？', options: ['12', '7', '9'], answer: 0 },
-    { id: 'm4', subject: '数学', q: '24 加 6 等于几？', options: ['28', '30', '32'], answer: 1 },
-    { id: 'm5', subject: '数学', q: '5 乘 2 等于几？', options: ['7', '10', '12'], answer: 1 },
-    { id: 'm6', subject: '数学', q: '18 减 7 等于几？', options: ['9', '10', '11'], answer: 2 },
-  ],
-  '英语': [
-    { id: 'e1', subject: '英语', q: '“苹果”用英语怎么说？', options: ['apple', 'banana', 'orange'], answer: 0 },
-    { id: 'e2', subject: '英语', q: '“cat”是什么小动物？', options: ['猫', '狗', '兔子'], answer: 0 },
-    { id: 'e3', subject: '英语', q: '“red”是什么颜色？', options: ['蓝色', '绿色', '红色'], answer: 2 },
-    { id: 'e4', subject: '英语', q: '“book”是什么意思？', options: ['书', '笔', '桌子'], answer: 0 },
-    { id: 'e5', subject: '英语', q: '“two”是数字几？', options: ['1', '2', '3'], answer: 1 },
-    { id: 'e6', subject: '英语', q: '“Good morning”是什么意思？', options: ['晚安', '早上好', '再见'], answer: 1 },
-  ],
-  '画画': [
-    { id: 'd1', subject: '画画', type: 'draw', q: '画一画你想象中的彩虹蘑菇吧', hint: '可以选颜色，画完让姐姐看看' },
-    { id: 'd2', subject: '画画', type: 'draw', q: '画一只你最喜欢的小动物吧', hint: '它长什么样？画给姐姐看看' },
-    { id: 'd3', subject: '画画', type: 'draw', q: '画一画今天的天空吧', hint: '今天的天是什么颜色的？' },
-  ],
-};
-
 function dayStamp() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
@@ -133,21 +102,6 @@ function read(key, fallback) {
 
 function write(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-}
-
-function pickDailyHomework() {
-  const d = new Date();
-  const seed = d.getDate() + (d.getMonth() + 1) * 31;
-  const out = [];
-  SUBJECTS.forEach((subject, si) => {
-    const list = HOMEWORK_BANK[subject];
-    const quota = PER_SUBJECT[subject] || 1;
-    const start = (seed + si * 3) % list.length;
-    for (let i = 0; i < quota; i++) {
-      out.push(list[(start + i) % list.length]);
-    }
-  });
-  return out;
 }
 
 export const rewards = {
@@ -219,28 +173,42 @@ export const rewards = {
     return this.allItems().length;
   },
 
-  getDailyHomework() {
-    return pickDailyHomework();
+  /** 每次打开作业都重新抽一套（语数英各 2 题 + 画画 1 题）。 */
+  startHomeworkSession() {
+    currentHomework = pickHomeworkSet();
+    const st = this.getHomeworkState();
+    st.done = [];
+    write(HOMEWORK_KEY, st);
+    return currentHomework;
+  },
+  getCurrentHomework() {
+    if (!currentHomework) currentHomework = pickHomeworkSet();
+    return currentHomework;
   },
   getHomeworkState() {
     const st = read(HOMEWORK_KEY, null);
     if (!st || st.day !== dayStamp() || !Array.isArray(st.done)) {
-      return { day: dayStamp(), done: [] };
+      return { day: dayStamp(), done: [], earned: 0 };
     }
-    return { day: st.day, done: st.done };
+    const earned = Number.isFinite(Number(st.earned)) ? Number(st.earned) : Math.min(7, st.done.length);
+    return { day: st.day, done: st.done, earned };
   },
   completeHomework(id) {
     const st = this.getHomeworkState();
     if (!st.done.includes(id)) {
       st.done.push(id);
-      write(HOMEWORK_KEY, st);
+      st.earned += 1;
       this.addStars(1);
+      write(HOMEWORK_KEY, st);
     }
     return this.getHomeworkState();
   },
+  homeworkEarned() {
+    return this.getHomeworkState().earned;
+  },
   homeworkDoneCount() {
-    const all = this.getDailyHomework();
+    const set = currentHomework || [];
     const st = this.getHomeworkState();
-    return all.filter(t => st.done.includes(t.id)).length;
+    return set.filter(t => st.done.includes(t.id)).length;
   },
 };
