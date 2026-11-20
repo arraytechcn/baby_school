@@ -3,9 +3,12 @@
 memory_server.py — 小星姐姐本地服务：静态页面 + 记忆库 API（SQLite）
 
 用法:
-    python3 tools/memory_server.py [--port 8899]
+    python3 tools/memory_server.py [--host 0.0.0.0] [--port 8899]
+    python3 tools/memory_server.py --host 0.0.0.0 --port 9443 \
+        --https-cert data/certs/server.pem --https-key data/certs/server-key.pem
 
-服务只监听 127.0.0.1，页面与接口同源，不需要 CORS。
+默认只监听 127.0.0.1；用 --host 0.0.0.0 可开放给局域网。
+页面与接口同源，不需要 CORS。
 数据库文件: data/memory.db（已 gitignore，不进仓库）
 
 接口:
@@ -24,6 +27,7 @@ import argparse
 import json
 import os
 import sqlite3
+import ssl
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
@@ -190,6 +194,19 @@ class Handler(BaseHTTPRequestHandler):
             return self._history_get(parsed)
         if path == '/api/facts':
             return self._facts_get()
+        if path in ('/ca.pem', '/ca.crt'):
+            ca_path = os.path.join(DATA_DIR, 'certs', 'ca.pem')
+            if os.path.isfile(ca_path):
+                with open(ca_path, 'rb') as fh:
+                    body = fh.read()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/x-x509-ca-cert')
+                self.send_header('Content-Disposition', 'attachment; filename="xiaoxing-ca.crt"')
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            return self._error(404, 'no ca')
         if path == '/favicon.ico':
             self.send_response(204)
             self.send_header('Content-Length', '0')
@@ -336,15 +353,24 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description='小星姐姐本地记忆库 + 静态服务')
+    parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=8899)
+    parser.add_argument('--https-cert')
+    parser.add_argument('--https-key')
     args = parser.parse_args()
 
     init_db()
     messages, facts = count_all()
-    server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
+    server = ThreadingHTTPServer((args.host, args.port), Handler)
+    scheme = 'http'
+    if args.https_cert and args.https_key:
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(args.https_cert, args.https_key)
+        server.socket = context.wrap_socket(server.socket, server_side=True)
+        scheme = 'https'
     server.daemon_threads = True
     rel_db = os.path.relpath(DB_PATH, ROOT)
-    print(f'[memory] http://127.0.0.1:{args.port}/  |  db={rel_db}  |  '
+    print(f'[memory] {scheme}://{args.host}:{args.port}/  |  db={rel_db}  |  '
           f'messages={messages} facts={facts}', flush=True)
     try:
         server.serve_forever()
