@@ -575,6 +575,85 @@
     .character svg, .scene-stars i { animation: none; }
     .character.wave .ch-arm-wave { animation: none; }
   }
+
+  /* ---------- 换装 / 每日任务 / 星星奖励 ---------- */
+  .sheet {
+    position: fixed; inset: 0; z-index: 32;
+    display: none; align-items: flex-end; justify-content: center;
+    background: rgba(59, 49, 42, 0.28);
+  }
+  .sheet.show { display: flex; }
+  #dress-sheet { background: linear-gradient(180deg, rgba(59,49,42,0) 0%, rgba(59,49,42,0.32) 55%); }
+  .sheet-card {
+    width: min(760px, 100%);
+    max-height: 78vh; overflow-y: auto;
+    background: #FFF8F0;
+    border-radius: 24px 24px 0 0;
+    padding: 16px 20px calc(22px + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 40px rgba(59,49,42,0.18);
+    color: #5a4a42;
+  }
+  .sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .sheet-head h3 { margin: 0; font-size: 19px; }
+  .sheet-close {
+    margin-left: auto; width: 36px; height: 36px; border-radius: 50%;
+    border: none; background: #F6E7D8; color: #8a6f5c;
+    font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  .sheet-note { font-size: 12.5px; color: #a08b80; margin: 10px 0 0; }
+  .outfit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .outfit-card {
+    display: flex; align-items: center; gap: 10px;
+    border: 2px solid #F0DCC8; border-radius: 16px;
+    padding: 10px 12px; background: #fff; color: inherit;
+    font: inherit; text-align: left; cursor: pointer;
+  }
+  .outfit-card.selected { border-color: #FFB37E; background: #FFF3E0; }
+  .outfit-card.locked { opacity: 0.62; }
+  .outfit-swatch {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    box-shadow: inset 0 -6px 0 rgba(0,0,0,0.06);
+  }
+  .outfit-name { font-size: 15px; font-weight: 600; }
+  .outfit-meta { font-size: 12px; color: #a08b80; }
+  .task-progress { display: flex; gap: 6px; margin: 2px 0 12px; }
+  .task-dot { width: 8px; height: 8px; border-radius: 50%; background: #E6D8C5; }
+  .task-dot.done { background: #FFB37E; }
+  .task-subject {
+    display: inline-block; font-size: 12px; color: #A8471F;
+    background: #F8E7DA; border-radius: 999px; padding: 2px 10px;
+  }
+  .task-q { font-size: 20px; line-height: 1.6; margin: 10px 0 14px; }
+  .task-options { display: flex; flex-direction: column; gap: 8px; }
+  .task-opt {
+    min-height: 48px; border: 2px solid #F0DCC8; border-radius: 14px;
+    background: #fff; color: #5a4a42; font: inherit; font-size: 17px;
+    cursor: pointer;
+  }
+  .task-opt:active { background: #FFF3E0; }
+  .task-opt.wrong { border-color: #E7A08C; animation: opt-shake 0.35s ease; }
+  @keyframes opt-shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  .task-done { text-align: center; padding: 22px 0 8px; }
+  .task-done .big { font-size: 40px; font-weight: 600; color: #A8471F; }
+  .star-big { text-align: center; font-size: 40px; font-weight: 600; color: #A8471F; margin: 6px 0 2px; }
+  .star-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .star-row {
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid #F0DCC8; border-radius: 14px; padding: 9px 12px; background: #fff;
+  }
+  .star-row .name { font-size: 14.5px; }
+  .star-row .meta { margin-left: auto; font-size: 12.5px; color: #a08b80; }
+  .star-row .meta.ok { color: #5E7C62; }
+
+  /* 服装配色与装饰 */
+  #character[data-outfit="daily"] .ch-dress { fill: #F3A074; }
+  #character[data-outfit="pajama"] .ch-dress { fill: #A6C4E4; }
+  #character[data-outfit="sport"] .ch-dress { fill: #8FB79A; }
+  #character[data-outfit="festival"] .ch-dress { fill: #E7B36A; }
+  .ch-deco { display: none; }
+  #character[data-outfit="pajama"] .ch-deco-pajama { display: block; }
+  #character[data-outfit="sport"] .ch-deco-sport { display: block; }
+  #character[data-outfit="festival"] .ch-deco-festival { display: block; }
 </style>
 </head>
 <body>
@@ -625,7 +704,7 @@
       <div class="scene-plant"><i class="leaf a"></i><i class="leaf b"></i><i class="leaf c"></i><i class="pot"></i></div>
       <div class="scene-rug"></div>
 
-      <div class="character" id="character" role="button" tabindex="0" aria-label="和小星姐姐打招呼">
+      <div class="character" id="character" data-outfit="daily" role="button" tabindex="0" aria-label="和小星姐姐打招呼">
         <svg viewBox="0 0 220 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <ellipse class="ch-shadow" cx="110" cy="364" rx="62" ry="9"/>
           <path class="ch-hair" d="M60 106 C52 54 78 30 110 30 C142 30 168 54 160 106 L168 198 C168 214 154 222 144 210 L138 150 L82 150 L76 210 C66 222 52 214 52 198 Z"/>
@@ -636,6 +715,13 @@
           <path class="ch-dress" d="M85 154 C72 157 66 167 64 181 L48 292 C46 304 54 312 66 312 H154 C166 312 174 304 172 292 L156 181 C154 167 148 157 135 154 Z"/>
           <path class="ch-dress" d="M84 155 C77 160 75 170 77 180 L90 176 L96 158 Z"/>
           <path class="ch-dress" d="M136 155 C143 160 145 170 143 180 L130 176 L124 158 Z"/>
+          <g class="ch-deco ch-deco-pajama" fill="#FFF7EC">
+            <circle cx="88" cy="228" r="2.4"/><circle cx="104" cy="252" r="1.8"/>
+            <circle cx="126" cy="236" r="2.4"/><circle cx="134" cy="272" r="1.8"/>
+            <circle cx="98" cy="286" r="2.2"/><circle cx="120" cy="300" r="1.6"/>
+          </g>
+          <path class="ch-deco ch-deco-sport" d="M72 210 L150 244 L146 256 L68 222 Z" fill="#FFF7EC" opacity="0.85"/>
+          <path class="ch-deco ch-deco-festival" d="M104 162 L116 162 L152 300 L140 304 Z" fill="#FFF3D6" opacity="0.9"/>
           <path class="ch-skin" d="M97 148 h26 l-5 12 h-16 z"/>
           <path class="ch-collar" d="M94 151 C100 158 106 162 110 162 C114 162 120 158 126 151 C121 149 115 148 110 148 C105 148 99 149 94 151 Z"/>
           <path class="ch-skin" d="M87 166 C77 184 71 210 69 234 L81 238 C84 214 91 192 99 176 Z"/>
@@ -796,6 +882,29 @@
     </div>
   </div>
 
+  <!-- 换装 / 每日任务 / 星星奖励 -->
+  <div class="sheet" id="dress-sheet" aria-hidden="true">
+    <div class="sheet-card">
+      <div class="sheet-head"><h3>换装</h3><button class="sheet-close" type="button" data-close="dress-sheet" aria-label="关闭">✕</button></div>
+      <div class="outfit-grid" id="outfit-grid"></div>
+      <p class="sheet-note">集齐星星解锁新衣服：每天第一次打电话 +1，答对一题 +1。</p>
+    </div>
+  </div>
+
+  <div class="sheet" id="task-sheet" aria-hidden="true">
+    <div class="sheet-card">
+      <div class="sheet-head"><h3>今日任务</h3><button class="sheet-close" type="button" data-close="task-sheet" aria-label="关闭">✕</button></div>
+      <div id="task-body"></div>
+    </div>
+  </div>
+
+  <div class="sheet" id="star-sheet" aria-hidden="true">
+    <div class="sheet-card">
+      <div class="sheet-head"><h3>星星奖励</h3><button class="sheet-close" type="button" data-close="star-sheet" aria-label="关闭">✕</button></div>
+      <div id="star-body"></div>
+    </div>
+  </div>
+
   <div id="header">
     <button id="chat-back" type="button" aria-label="返回首页">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -862,6 +971,7 @@ import { replySmart, greeting, sanitize } from './js/brain.js';
 import { getParentConfig, setParentConfig } from './js/qwen.js';
 import { store } from './js/store.js';
 import { memory } from './js/memory.js';
+import { rewards, OUTFITS } from './js/rewards.js';
 
 const avatar = document.getElementById('avatar');
 const historyEl = document.getElementById('history');
@@ -1119,13 +1229,13 @@ function saveUsage() {
 }
 
 function getStars() {
-  return parseInt(localStorage.getItem(STARS_KEY) || '0', 10) || 0;
+  return rewards.getStars();
 }
 
 function setStars(n) {
-  try { localStorage.setItem(STARS_KEY, String(n)); } catch {}
+  rewards.setStars(n);
   const el = document.getElementById('home-stars');
-  if (el) el.textContent = String(n);
+  if (el) el.textContent = String(rewards.getStars());
 }
 
 function renderUsage() {
@@ -1222,6 +1332,7 @@ function transcriptClear() {
 
 function startCall() {
   if (document.body.classList.contains('in-call')) return;
+  closeSheets();
   document.body.classList.add('in-call');
   transcriptClear();
   setCallStatus('按住说话');
@@ -1243,6 +1354,136 @@ function exitCall() {
   setMood('idle');
   setCallStatus('按住说话');
   renderHome();
+}
+
+function applyOutfit() {
+  const ch = document.getElementById('character');
+  if (ch) ch.dataset.outfit = rewards.getOutfit();
+}
+
+function closeSheets() {
+  const open = document.querySelectorAll('.sheet.show');
+  if (!open.length) return;
+  open.forEach(el => el.classList.remove('show'));
+  tts.stop();
+}
+
+function openSheet(id) {
+  closeSheets();
+  const el = document.getElementById(id);
+  if (el) el.classList.add('show');
+}
+
+function renderOutfits() {
+  const grid = document.getElementById('outfit-grid');
+  if (!grid) return;
+  const current = rewards.getOutfit();
+  grid.innerHTML = '';
+  OUTFITS.forEach(o => {
+    const owned = rewards.hasOutfit(o.id);
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'outfit-card' + (o.id === current ? ' selected' : '') + (owned ? '' : ' locked');
+    const swatch = document.createElement('span');
+    swatch.className = 'outfit-swatch';
+    swatch.style.background = o.color;
+    const text = document.createElement('span');
+    text.innerHTML = `<span class="outfit-name">${o.name}</span><br><span class="outfit-meta">${
+      owned ? (o.id === current ? '正在穿' : '已拥有') : `需 ${o.cost} 颗星星`
+    }</span>`;
+    card.appendChild(swatch);
+    card.appendChild(text);
+    card.onclick = () => {
+      if (owned) {
+        rewards.setOutfit(o.id);
+        rewards.syncUnlocks();
+  applyOutfit();
+        renderOutfits();
+      } else if (rewards.getStars() >= o.cost) {
+        rewards.unlockOutfit(o.id);
+        rewards.setOutfit(o.id);
+        applyOutfit();
+        renderOutfits();
+        sfx.star();
+        showToast(`解锁了${o.name}`);
+      } else {
+        showToast(`还差 ${o.cost - rewards.getStars()} 颗星星`);
+      }
+    };
+    grid.appendChild(card);
+  });
+}
+
+function openDress() {
+  openSheet('dress-sheet');
+  renderOutfits();
+}
+
+function renderTasks() {
+  const body = document.getElementById('task-body');
+  if (!body) return;
+  const tasks = rewards.getDailyTasks();
+  const state = rewards.getTaskState();
+  const done = new Set(state.done);
+  if (done.size >= tasks.length) {
+    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>今天的任务都完成啦，明天再来找姐姐吧。</p></div>`;
+    return;
+  }
+  const q = tasks.find(t => !done.has(t.id));
+  body.innerHTML = `
+    <div class="task-progress">${tasks.map(t => `<i class="task-dot ${done.has(t.id) ? 'done' : ''}"></i>`).join('')}</div>
+    <span class="task-subject">${q.subject}</span>
+    <div class="task-q">${q.q}</div>
+    <div class="task-options">${q.options.map((o, i) => `<button class="task-opt" type="button" data-i="${i}">${o}</button>`).join('')}</div>
+    <p class="sheet-note">答对一题得 1 颗星星，答错不扣星星。</p>`;
+  body.querySelectorAll('.task-opt').forEach(btn => {
+    btn.onclick = () => answerTask(q, Number(btn.dataset.i), btn);
+  });
+  speak(q.q, 'thinking');
+}
+
+function answerTask(q, i, btn) {
+  if (i === q.answer) {
+    rewards.completeTask(q.id);
+    sfx.star();
+    setStars(getStars());
+    showToast('答对啦，得到一颗星星');
+    renderTasks();
+  } else {
+    showToast('再想想，姐姐觉得你可以的');
+    if (btn) {
+      btn.classList.add('wrong');
+      setTimeout(() => btn.classList.remove('wrong'), 380);
+    }
+  }
+}
+
+function openTasks() {
+  openSheet('task-sheet');
+  renderTasks();
+}
+
+function renderStars() {
+  const body = document.getElementById('star-body');
+  if (!body) return;
+  const stars = rewards.getStars();
+  body.innerHTML = `
+    <div class="star-big">${stars} 颗星星</div>
+    <p class="sheet-note">每天第一次打电话 +1，答对一道题 +1。</p>
+    <div class="star-list">
+      ${OUTFITS.map(o => {
+        const owned = rewards.hasOutfit(o.id);
+        return `<div class="star-row"><span class="name">${o.name}</span><span class="meta ${owned ? 'ok' : ''}">${
+          owned ? '已解锁' : `集齐 ${o.cost} 颗星星解锁`
+        }</span></div>`;
+      }).join('')}
+    </div>
+    <p class="sheet-note">今天任务完成 ${rewards.tasksDoneCount()} / 3</p>`;
+}
+
+function openStars() {
+  openSheet('star-sheet');
+  renderStars();
 }
 
 function initHome() {
@@ -1272,9 +1513,16 @@ function initHome() {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showHomeLine(); }
     });
   }
-  document.getElementById('dress-btn').onclick = () => showToast('换装还在准备中，先和姐姐聊聊天吧');
-  document.getElementById('task-btn').onclick = () => showToast('今日任务下一阶段上线');
-  document.getElementById('star-btn').onclick = () => showToast(`你现在有 ${getStars()} 颗星星`);
+  document.getElementById('dress-btn').onclick = openDress;
+  document.getElementById('task-btn').onclick = openTasks;
+  document.getElementById('star-btn').onclick = openStars;
+  document.querySelectorAll('.sheet').forEach(sheet => {
+    sheet.addEventListener('click', e => { if (e.target === sheet) closeSheets(); });
+  });
+  document.querySelectorAll('.sheet-close').forEach(btn => {
+    btn.addEventListener('click', closeSheets);
+  });
+  applyOutfit();
 
   // 眨眼
   let blinkTimer = setInterval(() => {
@@ -1545,7 +1793,8 @@ document.getElementById('settings-close').onclick = closeSettings;
 settingsEl.addEventListener('click', e => { if (e.target === settingsEl) closeSettings(); });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
-  if (settingsEl.classList.contains('show')) closeSettings();
+  if (document.querySelector('.sheet.show')) closeSheets();
+  else if (settingsEl.classList.contains('show')) closeSettings();
   else if (gateEl.classList.contains('show')) closeGate();
 });
 
