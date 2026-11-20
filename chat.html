@@ -777,6 +777,31 @@
     border-radius: 12px; border: 1px solid #F0DCC8; background: #fff;
     margin: 8px auto; display: block;
   }
+  .pin-card { text-align: center; padding: 4px 0 2px; }
+  .pin-label { font-size: 13px; color: #a08b80; }
+  .pin-pinyin {
+    font-size: 30px; font-weight: 600; letter-spacing: 0.06em;
+    color: #A8471F; margin: 6px 0 16px; line-height: 1.3;
+  }
+  .pin-slots { display: flex; justify-content: center; gap: 12px; }
+  .pin-slot {
+    width: 64px; height: 64px; border-radius: 14px;
+    border: 2px dashed #E6D8C5; background: #fff;
+    font: inherit; font-size: 32px; color: #5a4a42; cursor: pointer;
+  }
+  .pin-slot.filled { border-style: solid; border-color: #FFB37E; background: #FFF3E0; }
+  .pin-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 16px 0 14px; }
+  .pin-tile {
+    width: 52px; height: 52px; border-radius: 12px;
+    border: 1px solid #F0DCC8; background: #fff;
+    font: inherit; font-size: 24px; color: #5a4a42; cursor: pointer;
+  }
+  .pin-tile:disabled { opacity: 0.28; }
+  .pin-actions { display: flex; justify-content: center; gap: 10px; }
+  .pin-hint { min-height: 18px; margin: 10px 0 0; font-size: 13px; color: #A8471F; }
+  .pin-card.wrong .pin-slots { animation: pinShake 0.32s ease; }
+  @keyframes pinShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
   .task-progress { display: flex; gap: 6px; margin: 2px 0 12px; }
   .task-dot { width: 8px; height: 8px; border-radius: 50%; background: #E6D8C5; }
   .task-dot.done { background: #FFB37E; }
@@ -2383,6 +2408,26 @@ function renderHomework() {
     });
   };
 
+  if (q.type === 'pinyin') {
+    body.innerHTML = `${head}
+      <div class="pin-card" id="pin-card">
+        <div class="pin-label">看拼音，写词语</div>
+        <div class="pin-pinyin">${q.pinyin}</div>
+        <div class="pin-slots" id="pin-slots"></div>
+        <div class="pin-tiles" id="pin-tiles"></div>
+        <div class="pin-actions">
+          <button class="draw-btn ghost" id="pin-clear" type="button">清空</button>
+          <button class="draw-btn primary" id="pin-submit" type="button" disabled>写好了</button>
+        </div>
+        <p class="pin-hint" id="pin-hint"></p>
+      </div>
+      <p class="sheet-note">点下面的字，组成词语。答对得 1 颗星星，答错不扣星。</p>`;
+    wireTabs();
+    setupPinyin(q);
+    speak('看拼音，写词语。', 'thinking');
+    return;
+  }
+
   if (q.type === 'draw') {
     body.innerHTML = `${head}
       <div class="task-q">${q.q}</div>
@@ -2414,6 +2459,92 @@ function renderHomework() {
     btn.onclick = () => answerHomework(q, Number(btn.dataset.i), btn);
   });
   speak(q.q, 'thinking');
+}
+
+function setupPinyin(q) {
+  const slotsEl = document.getElementById('pin-slots');
+  const tilesEl = document.getElementById('pin-tiles');
+  const submit = document.getElementById('pin-submit');
+  const clear = document.getElementById('pin-clear');
+  const hint = document.getElementById('pin-hint');
+  const card = document.getElementById('pin-card');
+  if (!slotsEl || !tilesEl || !submit || !clear || !hint || !card) return;
+
+  const word = String(q.word || '');
+  const n = word.length;
+  const tiles = [...q.tiles];
+  for (let i = tiles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+  }
+  let slots = [];
+  let tries = 0;
+
+  const render = () => {
+    slotsEl.innerHTML = Array.from({ length: n }, (_, i) => {
+      const used = slots[i] !== undefined;
+      return `<button class="pin-slot ${used ? 'filled' : ''}" type="button" data-slot="${i}">${used ? tiles[slots[i]] : ''}</button>`;
+    }).join('');
+    tilesEl.innerHTML = tiles.map((ch, i) => {
+      const used = slots.includes(i);
+      return `<button class="pin-tile" type="button" data-tile="${i}" ${used ? 'disabled' : ''}>${ch}</button>`;
+    }).join('');
+    submit.disabled = slots.length !== n;
+    slotsEl.querySelectorAll('.pin-slot').forEach(btn => {
+      btn.onclick = () => {
+        const i = Number(btn.dataset.slot);
+        if (slots[i] === undefined) return;
+        slots.splice(i, 1);
+        render();
+      };
+    });
+    tilesEl.querySelectorAll('.pin-tile').forEach(btn => {
+      btn.onclick = () => {
+        if (slots.length >= n) return;
+        slots.push(Number(btn.dataset.tile));
+        render();
+      };
+    });
+  };
+
+  clear.onclick = () => {
+    slots = [];
+    hint.textContent = '';
+    render();
+  };
+
+  submit.onclick = () => {
+    if (slots.length !== n) {
+      showToast('先把两个字都放好');
+      return;
+    }
+    const answer = slots.map(i => tiles[i]).join('');
+    if (answer === word) {
+      rewards.completeHomework(q.id, 1);
+      sfx.star();
+      setStars(getStars());
+      showToast('写对啦，得到一颗星星');
+      renderHomework();
+      return;
+    }
+    tries += 1;
+    slots = [];
+    render();
+    card.classList.add('wrong');
+    setTimeout(() => card.classList.remove('wrong'), 360);
+    if (tries >= 3) {
+      hint.textContent = `答案：${word}。再看看，重新拼一次吧。`;
+      showToast('看看答案，再试一次');
+    } else if (tries === 2) {
+      hint.textContent = `提示：第一个字是「${word[0]}」`;
+      showToast('再想想，注意拼音的声调');
+    } else {
+      hint.textContent = '';
+      showToast('再想想，看看拼音和字');
+    }
+  };
+
+  render();
 }
 
 function setupCanvas(q) {

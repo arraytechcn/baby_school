@@ -264,8 +264,56 @@ function buildExtraDrawing() {
   }));
 }
 
+// 第六单元「看拼音写词语」：从图片逐条录入，每题 2 字 + 2 个形近/同音干扰字
+const PINYIN_ROWS = [
+  ['xiǎo lóu', '小楼', ['小', '楼', '少', '搂']],
+  ['nián dài', '年代', ['年', '代', '午', '袋']],
+  ['chuān yī', '穿衣', ['穿', '衣', '窗', '依']],
+  ['diàn shì', '电视', ['电', '视', '田', '是']],
+  ['shèng lì', '胜利', ['胜', '利', '生', '力']],
+  ['dào lù', '道路', ['道', '路', '到', '露']],
+  ['tóng zhì', '同志', ['同', '志', '童', '治']],
+  ['hóng jūn', '红军', ['红', '军', '洪', '君']],
+  ['lǐ yóu', '理由', ['理', '由', '里', '油']],
+  ['dí jūn', '敌军', ['敌', '军', '低', '君']],
+  ['fēi cháng', '非常', ['非', '常', '飞', '长']],
+  ['zhàn shì', '战士', ['战', '士', '站', '土']],
+  ['zhàn zhēng', '战争', ['战', '争', '站', '睁']],
+  ['měi tiān', '每天', ['每', '天', '美', '夫']],
+  ['ài dài', '爱戴', ['爱', '戴', '受', '带']],
+  ['nán wàng', '难忘', ['难', '忘', '南', '望']],
+  ['yí chuàn', '一串', ['一', '串', '衣', '穿']],
+  ['cūn mín', '村民', ['村', '民', '存', '明']],
+  ['yīn wèi', '因为', ['因', '为', '音', '位']],
+  ['yóu yú', '由于', ['由', '于', '油', '鱼']],
+  ['kù zi', '裤子', ['裤', '子', '库', '字']],
+  ['kǒu lìng', '口令', ['口', '令', '扣', '今']],
+  ['fǎn zhèng', '反正', ['反', '正', '返', '证']],
+  ['bèi zi', '被子', ['被', '子', '背', '字']],
+  ['shēng yīn', '声音', ['声', '音', '生', '因']],
+  ['yuán gōng', '员工', ['员', '工', '圆', '公']],
+  ['nián suì', '年岁', ['年', '岁', '念', '碎']],
+  ['xiāo xi', '消息', ['消', '息', '销', '西']],
+  ['chāo xiě', '抄写', ['抄', '写', '炒', '些']],
+  ['chǎo cài', '炒菜', ['炒', '菜', '抄', '采']],
+];
+
+function buildPinyin() {
+  return PINYIN_ROWS.map(([pinyin, word, tiles], i) => ({
+    id: 'py' + (i + 1),
+    subject: '语文',
+    type: 'pinyin',
+    q: '看拼音，写词语',
+    pinyin,
+    word,
+    tiles,
+    tag: '看拼音写词语',
+    stars: 1,
+  }));
+}
+
 export const HOMEWORK_BANK = {
-  '语文': [...buildChinese(), ...buildExtras('语文', EXTRA_ROWS['语文'], 'cn', 51)],
+  '语文': [...buildChinese(), ...buildExtras('语文', EXTRA_ROWS['语文'], 'cn', 51), ...buildPinyin()],
   '数学': [...buildMath(), ...buildExtras('数学', EXTRA_ROWS['数学'], 'm', 51)],
   '英语': [...buildEnglish(), ...buildExtras('英语', EXTRA_ROWS['英语'], 'e', 51)],
   '画画': [...buildDrawing(), ...buildExtraDrawing()],
@@ -280,10 +328,13 @@ function shuffled(list) {
   return arr;
 }
 
-/** 每次调用重新抽一套：语数英各 2 题 + 画画 1 题。 */
+/** 每次调用重新抽一套：语文固定 1 拼音 + 1 选择题，数学/英语各 2，画画 1。 */
 export function pickHomeworkSet() {
   const out = [];
-  ['语文', '数学', '英语'].forEach(subject => {
+  const cn = HOMEWORK_BANK['语文'];
+  out.push(shuffled(cn.filter(q => q.type === 'pinyin'))[0]);
+  out.push(shuffled(cn.filter(q => q.type !== 'pinyin'))[0]);
+  ['数学', '英语'].forEach(subject => {
     out.push(...shuffled(HOMEWORK_BANK[subject]).slice(0, PER_SUBJECT[subject]));
   });
   out.push(shuffled(HOMEWORK_BANK['画画'])[0]);
