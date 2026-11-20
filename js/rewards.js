@@ -10,7 +10,7 @@ const OUTFIT_KEY = 'xjx_outfit';
 const HOMEWORK_KEY = 'xjx_homework';
 
 export const OUTFITS = [
-  { id: 'daily', name: '日常裙', cost: 0, color: '#F3A074' },
+  { id: 'daily', name: '日常装', cost: 0, color: '#7FA8C9' },
   { id: 'pajama', name: '睡衣', cost: 3, color: '#A6C4E4' },
   { id: 'sport', name: '运动服', cost: 6, color: '#8FB79A' },
   { id: 'festival', name: '节日裙', cost: 10, color: '#E7B36A' },

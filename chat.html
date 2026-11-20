@@ -445,9 +445,16 @@
   .ch-shadow { fill: rgba(90, 74, 66, 0.1); }
   .ch-skin { fill: #FFE8D6; }
   .ch-hair { fill: #8A6844; }
-  .ch-dress { fill: #F3A074; }
-  .ch-collar { fill: #FFF7EC; }
-  .ch-shoe { fill: #7A5C48; }
+  .ch-top { fill: #FFF3E0; }
+  .ch-pants { fill: #7FA8C9; }
+  .ch-waist { fill: rgba(0, 0, 0, 0.08); }
+  .ch-skirt { fill: #E7B36A; display: none; }
+  .ch-socks { fill: #FFFFFF; }
+  .ch-shoe { fill: #8A6844; }
+  .ch-sole { fill: #5F4A3B; }
+  .ch-collar { fill: #FFFDF9; }
+  .ch-button { fill: #C9B3A3; }
+  .ch-cap, .ch-beret { display: none; }
   .ch-mouth-1, .ch-mouth-2 { display: none; }
   #character.mouth-1 .ch-mouth-smile, #character.mouth-2 .ch-mouth-smile { display: none; }
   #character.mouth-1 .ch-mouth-1 { display: block; }
@@ -667,10 +674,28 @@
   .star-row .meta.ok { color: #5E7C62; }
 
   /* 服装配色与装饰 */
-  #character[data-outfit="daily"] .ch-dress { fill: #F3A074; }
-  #character[data-outfit="pajama"] .ch-dress { fill: #A6C4E4; }
-  #character[data-outfit="sport"] .ch-dress { fill: #8FB79A; }
-  #character[data-outfit="festival"] .ch-dress { fill: #E7B36A; }
+  #character[data-outfit="daily"] .ch-top { fill: #FFF3E0; }
+  #character[data-outfit="daily"] .ch-pants { fill: #7FA8C9; }
+  #character[data-outfit="daily"] .ch-shoe { fill: #8A6844; }
+
+  #character[data-outfit="pajama"] .ch-top { fill: #A6C4E4; }
+  #character[data-outfit="pajama"] .ch-pants { fill: #8FB0D6; }
+  #character[data-outfit="pajama"] .ch-socks { fill: #FFF7EC; }
+  #character[data-outfit="pajama"] .ch-shoe { fill: #D9A5A0; }
+  #character[data-outfit="pajama"] .ch-sole { fill: #B98A86; }
+
+  #character[data-outfit="sport"] .ch-top { fill: #8FB79A; }
+  #character[data-outfit="sport"] .ch-pants { fill: #4F6B86; }
+  #character[data-outfit="sport"] .ch-shoe { fill: #FFFDF9; }
+  #character[data-outfit="sport"] .ch-sole { fill: #C9B3A3; }
+  #character[data-outfit="sport"] .ch-cap { display: block; }
+
+  #character[data-outfit="festival"] .ch-top { fill: #FFF3D6; }
+  #character[data-outfit="festival"] .ch-skirt { display: block; }
+  #character[data-outfit="festival"] .ch-pants { display: none; }
+  #character[data-outfit="festival"] .ch-shoe { fill: #B04A28; }
+  #character[data-outfit="festival"] .ch-sole { fill: #8A3A1E; }
+  #character[data-outfit="festival"] .ch-beret { display: block; }
   .ch-deco { display: none; }
   #character[data-outfit="pajama"] .ch-deco-pajama { display: block; }
   #character[data-outfit="sport"] .ch-deco-sport { display: block; }
@@ -732,35 +757,63 @@
 
       <div class="character" id="character" data-outfit="daily" role="button" tabindex="0" aria-label="和小星姐姐打招呼">
         <svg viewBox="0 0 220 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <ellipse class="ch-shadow" cx="110" cy="364" rx="62" ry="9"/>
-          <path class="ch-hair" d="M60 106 C52 54 78 30 110 30 C142 30 168 54 160 106 L168 198 C168 214 154 222 144 210 L138 150 L82 150 L76 210 C66 222 52 214 52 198 Z"/>
-          <rect class="ch-skin" x="93" y="292" width="13" height="48" rx="6"/>
-          <rect class="ch-skin" x="114" y="292" width="13" height="48" rx="6"/>
-          <path class="ch-shoe" d="M86 336 h19 a7 7 0 0 1 7 7 v3 H84 v-3 a4 4 0 0 1 2-7z"/>
-          <path class="ch-shoe" d="M115 336 h19 a7 7 0 0 1 7 7 v3 h-28 v-3 a4 4 0 0 1 2-7z"/>
-          <path class="ch-dress" d="M85 154 C72 157 66 167 64 181 L48 292 C46 304 54 312 66 312 H154 C166 312 174 304 172 292 L156 181 C154 167 148 157 135 154 Z"/>
-          <path class="ch-dress" d="M84 155 C77 160 75 170 77 180 L90 176 L96 158 Z"/>
-          <path class="ch-dress" d="M136 155 C143 160 145 170 143 180 L130 176 L124 158 Z"/>
+          <ellipse class="ch-shadow" cx="110" cy="368" rx="62" ry="8"/>
+
+          <!-- 后发 -->
+          <path class="ch-hair" d="M62 104 C54 54 78 30 110 30 C142 30 166 54 158 104 L166 196 C166 212 152 220 142 208 L136 150 L84 150 L78 208 C68 220 54 212 54 196 Z"/>
+
+          <!-- 腿、袜、鞋 -->
+          <rect class="ch-skin" x="92" y="296" width="12" height="52" rx="6"/>
+          <rect class="ch-skin" x="116" y="296" width="12" height="52" rx="6"/>
+          <rect class="ch-socks" x="90" y="310" width="15" height="36" rx="6"/>
+          <rect class="ch-socks" x="115" y="310" width="15" height="36" rx="6"/>
+          <path class="ch-shoe" d="M84 342 h18 a7 7 0 0 1 7 7 v2 H80 v-2 a5 5 0 0 1 4-7z"/>
+          <path class="ch-shoe" d="M115 342 h19 a7 7 0 0 1 7 7 v2 h-30 v-2 a5 5 0 0 1 4-7z"/>
+          <rect class="ch-sole" x="80" y="350" width="27" height="3" rx="1.5"/>
+          <rect class="ch-sole" x="113" y="350" width="29" height="3" rx="1.5"/>
+
+          <!-- 裤子 -->
+          <path class="ch-pants" d="M83 238 L137 238 L141 256 L137 328 L115 328 L110 272 L105 328 L83 328 L79 256 Z"/>
+          <path class="ch-waist" d="M80 238 H140 V248 H80 Z"/>
+
+          <!-- 裙子（节日） -->
+          <path class="ch-skirt" d="M82 236 L138 236 L158 300 C158 310 150 316 140 316 H80 C70 316 62 310 62 300 Z"/>
+
+          <!-- 上衣与袖子 -->
+          <path class="ch-top" d="M84 158 C78 168 76 184 78 204 L80 242 H140 L142 204 C144 184 142 168 136 158 Z"/>
+          <path class="ch-top" d="M84 158 C74 164 70 176 72 188 L86 186 L92 164 Z"/>
+          <path class="ch-top" d="M136 158 C146 164 150 176 148 188 L134 186 L128 164 Z"/>
+          <path class="ch-collar" d="M96 154 C102 162 108 165 110 165 C112 165 118 162 124 154 C120 151 115 150 110 150 C105 150 100 151 96 154 Z"/>
+          <circle class="ch-button" cx="110" cy="192" r="2"/>
+          <circle class="ch-button" cx="110" cy="214" r="2"/>
+
+          <!-- 衣服装饰 -->
           <g class="ch-deco ch-deco-pajama" fill="#FFF7EC">
-            <circle cx="88" cy="228" r="2.4"/><circle cx="104" cy="252" r="1.8"/>
-            <circle cx="126" cy="236" r="2.4"/><circle cx="134" cy="272" r="1.8"/>
-            <circle cx="98" cy="286" r="2.2"/><circle cx="120" cy="300" r="1.6"/>
+            <circle cx="92" cy="182" r="2.2"/><circle cx="122" cy="196" r="1.8"/>
+            <circle cx="100" cy="216" r="2.2"/><circle cx="128" cy="226" r="1.6"/>
+            <circle cx="88" cy="232" r="1.8"/>
           </g>
-          <path class="ch-deco ch-deco-sport" d="M72 210 L150 244 L146 256 L68 222 Z" fill="#FFF7EC" opacity="0.85"/>
-          <path class="ch-deco ch-deco-festival" d="M104 162 L116 162 L152 300 L140 304 Z" fill="#FFF3D6" opacity="0.9"/>
-          <path class="ch-skin" d="M97 148 h26 l-5 12 h-16 z"/>
-          <path class="ch-collar" d="M94 151 C100 158 106 162 110 162 C114 162 120 158 126 151 C121 149 115 148 110 148 C105 148 99 149 94 151 Z"/>
-          <path class="ch-skin" d="M87 166 C77 184 71 210 69 234 L81 238 C84 214 91 192 99 176 Z"/>
-          <circle class="ch-skin" cx="75" cy="240" r="8"/>
+          <path class="ch-deco ch-deco-sport" d="M74 192 L142 222 L138 234 L70 204 Z" fill="#FFF7EC" opacity="0.85"/>
+          <path class="ch-deco ch-deco-festival" d="M100 238 L112 238 L128 302 L116 306 Z" fill="#FFF3D6" opacity="0.9"/>
+
+          <!-- 手臂 -->
+          <path class="ch-skin" d="M74 186 C70 200 68 218 68 234 L80 238 C82 218 86 200 92 190 Z"/>
+          <circle class="ch-skin" cx="74" cy="240" r="8"/>
           <g class="ch-arm-wave">
-            <path class="ch-skin" d="M133 166 C143 182 149 202 151 222 L139 226 C135 208 129 190 121 176 Z"/>
-            <circle class="ch-skin" cx="145" cy="228" r="8"/>
+            <path class="ch-skin" d="M146 186 C150 200 152 218 152 234 L140 238 C138 218 134 200 128 190 Z"/>
+            <circle class="ch-skin" cx="146" cy="240" r="8"/>
           </g>
-          <rect class="ch-skin" x="100" y="120" width="20" height="30" rx="9"/>
+
+          <!-- 脖子与头 -->
+          <rect class="ch-skin" x="100" y="120" width="20" height="32" rx="9"/>
           <circle class="ch-skin" cx="70" cy="96" r="6"/>
           <circle class="ch-skin" cx="150" cy="96" r="6"/>
           <circle class="ch-skin" cx="110" cy="90" r="40"/>
+
+          <!-- 刘海 -->
           <path class="ch-hair" d="M70 91 C68 57 86 41 110 41 C134 41 152 57 150 91 C142 75 134 69 130 79 C122 65 116 65 110 75 C104 65 98 65 90 79 C86 69 78 75 70 91 Z"/>
+
+          <!-- 五官 -->
           <g class="ch-eye">
             <ellipse cx="96" cy="94" rx="4.6" ry="6.6" fill="#4a3a32"/>
             <circle cx="97.6" cy="91.6" r="1.6" fill="#fff"/>
@@ -774,6 +827,18 @@
           <path class="ch-mouth-smile" d="M101 112 Q110 119 119 112" stroke="#c96f5e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
           <ellipse class="ch-mouth-1" cx="110" cy="115" rx="6" ry="3.5" fill="#c96f5e"/>
           <ellipse class="ch-mouth-2" cx="110" cy="116" rx="7.5" ry="6.5" fill="#c96f5e"/>
+
+          <!-- 帽子 -->
+          <g class="ch-cap">
+            <path d="M72 66 C78 34 142 34 148 66 Z" fill="#4F6B86"/>
+            <path d="M64 66 Q110 84 156 66 L156 73 Q110 91 64 73 Z" fill="#3F5670"/>
+            <circle cx="110" cy="42" r="3.2" fill="#3F5670"/>
+          </g>
+          <g class="ch-beret">
+            <ellipse cx="110" cy="52" rx="38" ry="13" fill="#B04A28" transform="rotate(-8 110 52)"/>
+            <ellipse cx="110" cy="60" rx="30" ry="5" fill="#8A3A1E"/>
+            <circle cx="142" cy="40" r="7" fill="#FFF3D6"/>
+          </g>
         </svg>
       </div>
 
