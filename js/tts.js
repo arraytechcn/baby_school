@@ -229,6 +229,163 @@ async function speakCosyVoice(text, handlers) {
   });
 }
 
+/* ---------- CosyVoice 流式引擎（SSE + PCM，降低首声延迟） ----------
+   非流式接口要等整段合成完（实测约 1.2s）才返回音频 url；
+   加 X-DashScope-SSE 后首个音频块约 0.5s 到达，边下边播。
+   用 Web Audio 按 24kHz PCM16 直接排期，不依赖 MediaSource（iPad 兼容）。 */
+const STREAM_RATE = 24000;
+let streamCtx = null;
+let streamGain = null;
+let streamAbort = null;
+let streamSources = [];
+let speakSeq = 0;
+
+function stopStream() {
+  if (streamAbort) {
+    try { streamAbort.abort(); } catch {}
+    streamAbort = null;
+  }
+  for (const src of streamSources) {
+    try { src.stop(); } catch {}
+  }
+  streamSources = [];
+}
+
+function base64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function pcm16ToFloat32(bytes) {
+  const n = bytes.byteLength >> 1;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) out[i] = view.getInt16(i * 2, true) / 32768;
+  return out;
+}
+
+function ensureAudio() {
+  if (!streamCtx) {
+    streamCtx = new (window.AudioContext || window.webkitAudioContext)();
+    streamGain = streamCtx.createGain();
+    streamGain.connect(streamCtx.destination);
+  }
+  return streamCtx;
+}
+
+function speakCosyVoiceStream(text, handlers) {
+  return new Promise(async resolve => {
+    const key = getKey();
+    if (!key) return resolve(false);
+    const { onStart, onMouth, onEnd } = handlers;
+
+    const ctx = ensureAudio();
+    try { await ctx.resume(); } catch {}
+    // 自动播放策略拦住 Web Audio 时，交给 <audio> 兜底再试
+    if (ctx.state !== 'running') return resolve(false);
+    streamGain.gain.value = state.volume;
+
+    const ctrl = new AbortController();
+    streamAbort = ctrl;
+    let nextAt = 0;
+    let firstAudio = false;
+    let ended = false;
+    let settled = false;
+    let timer = setTimeout(() => ctrl.abort(), COSYVOICE_TIMEOUT);
+
+    const finish = ok => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      stopMouthFallback();
+      state.speaking = false;
+      if (streamAbort === ctrl) streamAbort = null;
+      if (firstAudio) onEnd && onEnd();
+      resolve(ok);
+    };
+
+    const schedule = b64 => {
+      const bytes = base64ToBytes(b64);
+      if (bytes.byteLength < 2) return;
+      const samples = pcm16ToFloat32(bytes);
+      const buffer = ctx.createBuffer(1, samples.length, STREAM_RATE);
+      buffer.copyToChannel(samples, 0);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(streamGain);
+      const at = Math.max(ctx.currentTime + 0.08, nextAt);
+      src.start(at);
+      nextAt = at + buffer.duration;
+      streamSources.push(src);
+      src.onended = () => {
+        streamSources = streamSources.filter(s => s !== src);
+        if (ended && streamSources.length === 0) finish(firstAudio);
+      };
+      if (!firstAudio) {
+        firstAudio = true;
+        clearTimeout(timer);
+        timer = setTimeout(() => ctrl.abort(), 20000); // 长文本兜底
+        state.speaking = true;
+        onStart && onStart();
+        if (onMouth) startMouthFallback(onMouth);
+      }
+    };
+
+    try {
+      const resp = await fetch(COSYVOICE_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json',
+          'X-DashScope-SSE': 'enable',
+        },
+        body: JSON.stringify({
+          model: COSYVOICE_MODEL,
+          input: {
+            text,
+            voice: state.cosyVoiceId,
+            format: 'pcm',
+            sample_rate: STREAM_RATE,
+            rate: state.rate,
+            pitch: state.pitch,
+          },
+        }),
+        signal: ctrl.signal,
+      });
+      if (!resp.ok || !resp.body) return finish(false);
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buf = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buf.indexOf('\n\n')) !== -1) {
+          const block = buf.slice(0, idx);
+          buf = buf.slice(idx + 2);
+          for (const line of block.split('\n')) {
+            if (!line.startsWith('data:')) continue;
+            let evt;
+            try { evt = JSON.parse(line.slice(5).trim()); } catch { continue; }
+            if (evt.code || evt.message) return finish(firstAudio);
+            const audio = evt.output && evt.output.audio && evt.output.audio.data;
+            if (audio) schedule(audio);
+          }
+        }
+      }
+      ended = true;
+      if (streamSources.length === 0) finish(firstAudio);
+    } catch {
+      ended = true;
+      if (streamSources.length === 0) finish(firstAudio);
+    }
+  });
+}
+
 /* ---------- Web Speech 引擎 ---------- */
 function speakWebSpeech(text, handlers) {
   const { onStart, onMouth, onEnd, onFallback } = handlers;
@@ -288,6 +445,9 @@ function speakWebSpeech(text, handlers) {
 export const tts = {
   get supported() { return state.supported || !!getKey(); },
   get speaking() { return state.speaking; },
+  get enabled() { return state.enabled; },
+  get rate() { return state.rate; },
+  get volume() { return state.volume; },
   get engine() { return getKey() ? 'cosyvoice' : (state.supported ? 'webspeech' : 'none'); },
   get voiceName() {
     if (getKey()) {
@@ -336,6 +496,7 @@ export const tts = {
   async speak(text, handlers = {}) {
     const { onFallback, onDegrade } = handlers;
     this.stop();
+    const seq = speakSeq;
 
     if (!state.enabled) {
       onFallback && onFallback();
@@ -344,8 +505,13 @@ export const tts = {
     }
 
     if (getKey()) {
+      // 先走流式（首声约 0.5s）；失败再走非流式，最后 Web Speech
+      const streamed = await speakCosyVoiceStream(text, handlers);
+      if (streamed) return;
+      if (seq !== speakSeq) return; // 中途被 stop，不重播
       const ok = await speakCosyVoice(text, handlers);
       if (ok) return;
+      if (seq !== speakSeq) return;
       // CosyVoice 失败，静默降级 Web Speech（不打扰孩子）
       onDegrade && onDegrade('webspeech');
     }
@@ -360,8 +526,10 @@ export const tts = {
   },
 
   stop() {
+    speakSeq++;
     if (state.supported) speechSynthesis.cancel();
     stopCosyAudio();
+    stopStream();
     state.speaking = false;
     stopMouthFallback();
   },
@@ -376,5 +544,9 @@ document.addEventListener('visibilitychange', () => {
   if (cosyAudio) {
     if (document.hidden) cosyAudio.pause();
     else cosyAudio.play().catch(() => {});
+  }
+  if (streamCtx) {
+    if (document.hidden) streamCtx.suspend().catch(() => {});
+    else streamCtx.resume().catch(() => {});
   }
 });

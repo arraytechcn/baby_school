@@ -21,7 +21,8 @@ const ASR_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-
 const ASR_TIMEOUT = 8000;
 const KEY_STORAGE = 'xjx_dashscope_key';
 const MAX_RECORD_MS = 20000; // 最长录音 20 秒，防孩子按住不放
-const INTERIM_MS = 3000;     // 实时上屏的前缀识别间隔
+const FIRST_INTERIM_MS = 900; // 第一次实时上屏：尽早出字
+const INTERIM_MS = 1400;      // 之后的前缀识别间隔
 
 function getKey() {
   const s = localStorage.getItem(KEY_STORAGE);
@@ -34,7 +35,7 @@ function getKey() {
  * （真实麦克风下 "朵朵" 会被听成 "宝宝"，2026-09-02 用户实测）。
  */
 function buildContext() {
-  const parts = ['这是小朋友和AI姐姐（小星姐姐）的语音对话，语气童真'];
+  const parts = ['这是小朋友和AI姐姐（小星姐姐）的语音对话，语气童真', '孩子叫姐姐"小星姐姐"'];
   const f = memory.facts;
   if (f.name) parts.push(`孩子的名字叫${f.name}`);
   if (f.likes.length) parts.push(`孩子喜欢：${f.likes.join('、')}`);
@@ -58,6 +59,36 @@ function pickMime() {
   return '';
 }
 
+/* ---------- 麦克风选择：优先内建，避免被 Continuity 的 iPhone 麦克风抢走 ---------- */
+async function pickBuiltinMicId() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const inputs = devices.filter(d =>
+      d.kind === 'audioinput' && d.deviceId && d.deviceId !== 'default' && d.deviceId !== 'communications'
+    );
+    // macOS 内建叫 “MacBook Pro麦克风”，iPad 叫 “iPad 麦克风”；
+    // iPhone 连续性麦克风是 “某某”的麦克风，不匹配这里。
+    const builtin = inputs.find(d =>
+      /MacBook|Built-?in|内建|iPad/i.test(d.label) && !/iPhone/i.test(d.label)
+    );
+    return builtin ? builtin.deviceId : null;
+  } catch {
+    return null;
+  }
+}
+
+async function openMic() {
+  const id = await pickBuiltinMicId();
+  if (id) {
+    try {
+      return await navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: id } } });
+    } catch {
+      // 设备被拔掉 / deviceId 失效：退回系统默认
+    }
+  }
+  return navigator.mediaDevices.getUserMedia({ audio: true });
+}
+
 export const asr = {
   get supported() {
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
@@ -74,7 +105,7 @@ export const asr = {
   async startLive(onPartial, onAutoStop) {
     if (liveActive) return true;
     try {
-      liveStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      liveStream = await openMic();
     } catch {
       return false;
     }
@@ -88,21 +119,33 @@ export const asr = {
     liveRecorder.ondataavailable = e => { if (e.data.size) liveChunks.push(e.data); };
     liveRecorder.start();
 
-    // 前缀识别上屏：每 INTERIM_MS 把完整前缀识别一次（仅显示用）
-    interimTimer = setInterval(() => {
-      if (!liveActive || interimBusy || !liveChunks.length) return;
-      interimBusy = true;
-      liveRecorder.requestData(); // 让已录内容立刻落进 chunks
-      setTimeout(async () => {
+    // 前缀识别上屏：第一次 0.9s 就出字，之后每 1.4s 更新一次（仅显示用）
+    const scheduleInterim = delay => {
+      interimTimer = setTimeout(async () => {
+        if (!liveActive || !liveRecorder) return;
+        if (interimBusy) {
+          scheduleInterim(INTERIM_MS);
+          return;
+        }
+        interimBusy = true;
+        const rec = liveRecorder;
         try {
-          const blob = new Blob(liveChunks, { type: liveRecorder.mimeType || 'audio/webm' });
+          // 必须先 requestData，否则 chunks 里只有松手时那一段，永远出不了实时字
+          const before = liveChunks.length;
+          try { rec.requestData(); } catch { return; }
+          await new Promise(r => setTimeout(r, 150));
+          if (!liveActive || !rec || liveChunks.length === before) return;
+          const blob = new Blob(liveChunks, { type: rec.mimeType || 'audio/webm' });
+          if (blob.size < 1200) return;
           const r = await this.recognize(blob);
           if (r && r.text && liveActive) liveOnPartial && liveOnPartial(r.text);
         } finally {
           interimBusy = false;
+          if (liveActive) scheduleInterim(INTERIM_MS);
         }
-      }, 60);
-    }, INTERIM_MS);
+      }, delay);
+    };
+    scheduleInterim(FIRST_INTERIM_MS);
 
     maxTimer = setTimeout(() => {
       if (liveActive) {

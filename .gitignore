@@ -2,3 +2,11 @@
 config.local.json
 nohup.out
 .DS_Store
+
+# 插件本地依赖链接（指向 npx 缓存，不进仓库）
+tools/dsh-tts-summary/node_modules/
+__pycache__/
+*.pyc
+
+# 本地记忆库
+data/

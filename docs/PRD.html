@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小陪伴 · 儿童 AI 智能伙伴 H5 · 产品需求文档 V1.0</title>
+<style>
+  :root {
+    --paper: #FBF6EE;
+    --paper-2: #F6EEE1;
+    --card: #FFFDF9;
+    --ink: #3B312A;
+    --muted: #77675A;
+    --line: #E6D8C5;
+    --accent: #A8471F;
+    --accent-soft: #F2DFCF;
+    --sage: #5E7C62;
+    --night: #2F3A49;
+    --radius: 14px;
+    --shadow: 0 1px 0 rgba(59, 49, 42, 0.04), 0 12px 32px -24px rgba(59, 49, 42, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16.5px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--accent-soft); color: var(--ink); }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+  .skip {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--ink); color: var(--paper);
+    padding: 10px 16px; border-radius: 0 0 10px 0; z-index: 100;
+  }
+  .skip:focus { left: 0; }
+
+  .progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0;
+    background: var(--accent); z-index: 60;
+    transition: width 0.1s linear;
+  }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 28px; height: 58px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+    font-size: 17px; letter-spacing: 0.08em;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .brand span {
+    font-family: "PingFang SC", sans-serif;
+    font-size: 11px; letter-spacing: 0.16em; color: var(--muted);
+  }
+  .print-btn {
+    margin-left: auto;
+    min-height: 36px; padding: 6px 14px;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: transparent; color: var(--ink);
+    font: inherit; font-size: 13px; cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .print-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .print-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 272px minmax(0, 1fr);
+    gap: 72px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 32px 96px;
+  }
+
+  /* ---------- 侧栏 ---------- */
+  .sidebar {
+    position: sticky; top: 58px;
+    align-self: start;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+    padding: 40px 0 32px;
+    border-right: 1px solid var(--line);
+  }
+  .side-head { padding-right: 28px; }
+  .kicker {
+    font-size: 11.5px; letter-spacing: 0.18em;
+    color: var(--accent); text-transform: none;
+  }
+  .doc-title {
+    font-family: "Songti SC", "STSong", serif;
+    font-size: 21px; line-height: 1.45; margin-top: 8px;
+  }
+  .doc-sub { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+
+  #toc {
+    margin-top: 26px;
+    padding-right: 20px;
+    border-left: 1px solid var(--line);
+  }
+  #toc a {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 5px 0 5px 14px;
+    color: var(--muted); text-decoration: none;
+    font-size: 13.5px; line-height: 1.5;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #toc a span {
+    font-family: "Songti SC", "STSong", serif;
+    font-size: 11.5px; color: #B4A28F;
+    min-width: 20px;
+  }
+  #toc a:hover { color: var(--ink); }
+  #toc a[aria-current="true"] {
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+  #toc a[aria-current="true"] span { color: var(--accent); }
+  #toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .side-foot { margin-top: 32px; padding-right: 28px; }
+  .rule {
+    height: 1px; background: var(--line); margin-bottom: 14px;
+  }
+  .side-foot p { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0; }
+
+  /* ---------- 正文 ---------- */
+  main { padding-top: 0; min-width: 0; }
+
+  .cover {
+    position: relative;
+    padding: 76px 0 44px;
+    border-bottom: 1px solid var(--line);
+  }
+  .cover h1 {
+    font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+    font-weight: 600;
+    font-size: clamp(44px, 6vw, 66px);
+    line-height: 1.08;
+    letter-spacing: 0.02em;
+    margin: 18px 0 0;
+  }
+  .cover h1 em {
+    display: block;
+    font-style: normal;
+    font-size: 0.42em;
+    letter-spacing: 0.42em;
+    color: var(--muted);
+    margin-top: 14px;
+    font-weight: 400;
+  }
+  .lede {
+    max-width: 34em;
+    font-size: 18px;
+    color: #57483C;
+    margin: 26px 0 0;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin-top: 44px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .meta-grid div {
+    padding: 16px 18px 15px 0;
+  }
+  .meta-grid div + div { padding-left: 18px; border-left: 1px solid var(--line); }
+  .meta-grid dt {
+    font-size: 11.5px; letter-spacing: 0.14em; color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .meta-grid dd { margin: 0; font-size: 14px; line-height: 1.6; }
+
+  .motif {
+    position: absolute; top: 56px; right: 0;
+    width: 168px; height: 168px;
+    pointer-events: none;
+  }
+  .motif .sun { fill: #EAC7A2; }
+  .motif .moon {
+    fill: var(--night); fill-opacity: 0.22;
+    stroke: var(--night); stroke-opacity: 0.42; stroke-width: 1;
+  }
+  .motif .arc { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 6; }
+  .motif .star { fill: #B9A28B; }
+
+  section[id] { scroll-margin-top: 76px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .sec { padding: 52px 0 8px; border-bottom: 1px solid var(--line); }
+  .sec:last-of-type { border-bottom: 0; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; }
+  .sec-head .num {
+    font-family: "Songti SC", "STSong", serif;
+    font-size: 13px; color: var(--accent); letter-spacing: 0.08em;
+    min-width: 28px;
+  }
+  h2 {
+    font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+    font-size: clamp(26px, 3.2vw, 32px);
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  h3 {
+    font-size: 19px; font-weight: 600;
+    margin: 34px 0 12px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  h3::before {
+    content: ""; width: 14px; height: 2px; background: var(--accent);
+    flex: 0 0 auto; transform: translateY(-5px);
+  }
+  h4 {
+    font-size: 15.5px; font-weight: 600;
+    margin: 22px 0 8px;
+    color: #4A3B30;
+  }
+  p { margin: 12px 0; }
+  .sec > p, .sec > .depth { max-width: 40em; }
+  strong { font-weight: 600; }
+  .muted { color: var(--muted); }
+
+  ul, ol { margin: 12px 0; padding-left: 0; list-style: none; }
+  ul li {
+    position: relative; padding-left: 20px; margin: 7px 0;
+  }
+  ul li::before {
+    content: ""; position: absolute; left: 2px; top: 0.78em;
+    width: 7px; height: 1px; background: #B9A28B;
+  }
+  ol.steps { counter-reset: step; }
+  ol.steps li {
+    counter-increment: step;
+    position: relative; padding-left: 40px; margin: 10px 0;
+  }
+  ol.steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute; left: 0; top: 0.15em;
+    font-family: "Songti SC", "STSong", serif;
+    font-size: 12px; color: var(--accent);
+    border: 1px solid var(--line); border-radius: 999px;
+    width: 26px; height: 26px; line-height: 24px; text-align: center;
+    background: var(--card);
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin: 16px 0;
+    box-shadow: var(--shadow);
+  }
+  .card h4 { margin-top: 0; }
+  .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 18px 0; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 18px 0; }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: #F8EDE3;
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .callout p { margin: 4px 0; }
+  .callout .label {
+    font-size: 11.5px; letter-spacing: 0.16em; color: var(--accent);
+    display: block; margin-bottom: 6px;
+  }
+  .quote {
+    font-family: "Songti SC", "STSong", serif;
+    font-size: 20px; line-height: 1.7;
+    color: #54453A;
+    border-left: 2px solid var(--line);
+    padding-left: 20px;
+    margin: 24px 0;
+  }
+
+  .table-wrap { overflow-x: auto; margin: 18px 0; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14.5px; line-height: 1.7;
+    background: var(--card);
+  }
+  th {
+    text-align: left; font-weight: 600; font-size: 12.5px;
+    color: var(--muted); letter-spacing: 0.04em;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--ink);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:nth-child(even) { background: #FAF3E8; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11.5px; letter-spacing: 0.06em;
+    padding: 2px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted);
+    background: var(--paper);
+    margin-right: 4px;
+  }
+  .pill.on { color: var(--sage); border-color: #CBD9CB; background: #F0F5EF; }
+  .pill.warn { color: var(--accent); border-color: #E7C6B4; background: #FBF0E8; }
+
+  .module-list { counter-reset: mod; margin: 20px 0; }
+  .module-list li {
+    counter-increment: mod;
+    position: relative; padding: 14px 18px 14px 56px;
+    border: 1px solid var(--line); border-radius: 12px;
+    background: var(--card); margin: 10px 0;
+  }
+  .module-list li::before {
+    content: counter(mod, decimal-leading-zero);
+    position: absolute; left: 18px; top: 14px;
+    font-family: "Songti SC", "STSong", serif;
+    color: var(--accent); font-size: 13px;
+  }
+
+  .phase {
+    display: grid; grid-template-columns: 88px minmax(0, 1fr);
+    gap: 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--line);
+  }
+  .phase:first-of-type { border-top: 0; }
+  .phase .tag {
+    font-family: "Songti SC", "STSong", serif;
+    color: var(--accent); font-size: 14px; letter-spacing: 0.06em;
+  }
+  .phase h4 { margin: 0 0 6px; font-size: 17px; }
+
+  .checklist { counter-reset: chk; }
+  .checklist li {
+    counter-increment: chk;
+    position: relative; padding-left: 42px; margin: 12px 0;
+  }
+  .checklist li::before {
+    content: counter(chk, decimal-leading-zero);
+    position: absolute; left: 0; top: 0.1em;
+    font-family: "Songti SC", "STSong", serif;
+    font-size: 13px; color: var(--accent);
+  }
+
+  .footer {
+    margin-top: 48px; padding: 28px 0 0;
+    border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 12.5px;
+    display: flex; justify-content: space-between; gap: 20px;
+  }
+
+  @media (max-width: 960px) {
+    .layout { display: block; padding: 0 20px 64px; }
+    .sidebar {
+      position: sticky; top: 58px; z-index: 40;
+      height: auto; overflow: visible;
+      border-right: 0; border-bottom: 1px solid var(--line);
+      padding: 12px 0 10px;
+      background: var(--paper);
+    }
+    .side-head, .side-foot { display: none; }
+    #toc {
+      display: flex; gap: 4px; overflow-x: auto;
+      margin: 0; padding: 0 0 4px; border-left: 0;
+      scrollbar-width: none;
+    }
+    #toc::-webkit-scrollbar { display: none; }
+    #toc a {
+      flex: 0 0 auto; white-space: nowrap;
+      border-left: 0; border-bottom: 2px solid transparent;
+      padding: 4px 10px; margin: 0;
+      font-size: 12.5px;
+    }
+    #toc a span { display: none; }
+    #toc a[aria-current="true"] { border-bottom-color: var(--accent); }
+    main { padding-top: 8px; }
+    .cover { padding-top: 40px; }
+    .motif { width: 110px; height: 110px; top: 36px; opacity: 0.55; }
+    .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .meta-grid div { padding: 12px 12px 10px 0; }
+    .meta-grid div + div { padding-left: 0; border-left: 0; }
+    .meta-grid div:nth-child(even) { padding-left: 14px; border-left: 1px solid var(--line); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .phase { grid-template-columns: 1fr; gap: 4px; }
+    body { font-size: 16px; }
+    .sec { padding-top: 40px; }
+    section[id] { scroll-margin-top: 132px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .progress { transition: none; }
+  }
+
+  @media print {
+    @page { margin: 18mm 16mm; }
+    body { background: #fff; color: #000; font-size: 10.5pt; line-height: 1.6; }
+    .topbar, .sidebar, .progress, .skip, .print-btn { display: none !important; }
+    .layout { display: block; padding: 0; max-width: none; }
+    main { padding: 0; }
+    .cover { padding-top: 0; page-break-after: always; }
+    .motif { display: none; }
+    .sec { page-break-inside: auto; break-inside: auto; padding: 18pt 0 6pt; }
+    .card, .callout, .phase, table, .module-list li { break-inside: avoid; }
+    h2, h3, h4 { break-after: avoid; }
+    a { color: #000; text-decoration: none; }
+    .card, table, .module-list li { box-shadow: none; background: #fff; }
+    tbody tr:nth-child(even) { background: #fff; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#doc">跳到正文</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">小陪伴<span>PRD · V1.0 MVP</span></div>
+  <button class="print-btn" id="print-btn" type="button">打印 / 导出 PDF</button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-head">
+      <div class="kicker">产品需求文档</div>
+      <div class="doc-title">儿童 AI 智能伙伴 H5</div>
+      <p class="doc-sub">小陪伴 / 温柔姐姐 · V1.0 MVP</p>
+    </div>
+
+    <nav id="toc" aria-label="文档目录">
+      <a href="#s1"><span>01</span>产品定位</a>
+      <a href="#s2"><span>02</span>用户与场景</a>
+      <a href="#s3"><span>03</span>产品原则</a>
+      <a href="#s4"><span>04</span>角色设计</a>
+      <a href="#s5"><span>05</span>产品结构总览</a>
+      <a href="#s6"><span>06</span>核心页面设计</a>
+      <a href="#s7"><span>07</span>功能需求</a>
+      <a href="#s8"><span>08</span>非功能需求</a>
+      <a href="#s9"><span>09</span>技术实现建议</a>
+      <a href="#s10"><span>10</span>MVP 范围</a>
+      <a href="#s11"><span>11</span>页面信息架构</a>
+      <a href="#s12"><span>12</span>关键交互流程</a>
+      <a href="#s13"><span>13</span>成功指标</a>
+      <a href="#s14"><span>14</span>视觉与 UI 要求</a>
+      <a href="#s15"><span>15</span>风险与注意事项</a>
+      <a href="#s16"><span>16</span>开发排期建议</a>
+      <a href="#s17"><span>17</span>给 Agent 的实现要求</a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="rule"></div>
+      <p>5–9 岁儿童 + 家长<br>手机优先 · 兼容平板<br>先自用，后对外销售</p>
+    </div>
+  </aside>
+
+  <main id="doc">
+    <section class="cover">
+      <div class="kicker">V1.0 MVP · 产品需求文档</div>
+      <h1>小陪伴<em>温柔姐姐</em></h1>
+      <p class="lede">一个面向儿童的语音智能伙伴 H5。孩子可以像"打电话"一样和虚拟姐姐聊天、互动、换装、做轻学习任务；家长可以控制价值观、使用时长、敏感话题和学习内容。</p>
+
+      <svg class="motif" viewBox="0 0 168 168" aria-hidden="true">
+        <circle class="sun" cx="56" cy="70" r="31"/>
+        <path class="moon" d="M119 38a35 35 0 1 0 0 70 35 35 0 0 1 0-70z"/>
+        <circle class="arc" cx="84" cy="84" r="72"/>
+        <circle class="arc" cx="84" cy="84" r="56"/>
+        <circle class="star" cx="132" cy="36" r="1.7"/>
+        <circle class="star" cx="146" cy="56" r="1.2"/>
+        <circle class="star" cx="118" cy="22" r="1.2"/>
+      </svg>
+
+      <dl class="meta-grid">
+        <div><dt>产品代号</dt><dd>小陪伴 / 温柔姐姐</dd></div>
+        <div><dt>版本</dt><dd>V1.0 MVP</dd></div>
+        <div><dt>形态</dt><dd>H5，手机优先，兼容平板</dd></div>
+        <div><dt>目标用户</dt><dd>5–9 岁儿童 + 家长</dd></div>
+        <div><dt>当前阶段</dt><dd>先给自己孩子试用</dd></div>
+        <div><dt>后续计划</dt><dd>线上部署，对外销售</dd></div>
+        <div><dt>技术基调</dt><dd>前端轻量、后端统一代理</dd></div>
+        <div><dt>文档状态</dt><dd>可评审 / 可拆解排期</dd></div>
+      </dl>
+
+      <blockquote class="quote">不是做一个单纯聊天机器人，而是做一个孩子愿意每天打开、家长敢放心给孩子使用的智能伙伴。</blockquote>
+    </section>
+
+    <section class="sec" id="s1">
+      <div class="sec-head"><span class="num">01</span><h2>产品定位</h2></div>
+
+      <h3>1.1 一句话定义</h3>
+      <p>一个面向儿童的<strong>语音智能伙伴 H5</strong>，孩子可以像"打电话"一样与虚拟姐姐聊天、互动、换装、做轻学习任务；家长可控制价值观、使用时长、敏感话题和学习内容。</p>
+
+      <h3>1.2 产品目标</h3>
+      <p>不是做一个单纯聊天机器人，而是做一个：</p>
+      <ul>
+        <li>孩子愿意每天打开的智能伙伴</li>
+        <li>家长敢放心给孩子使用的安全产品</li>
+        <li>可成长、可换装、轻游戏化的陪伴应用</li>
+        <li>后续可线上部署、可对外销售的 H5 产品</li>
+      </ul>
+
+      <h3>1.3 核心卖点</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h4>体验</h4>
+          <ul>
+            <li>纯语音交流，儿童上手简单</li>
+            <li>有完整虚拟形象、全身展示、场景氛围</li>
+            <li>支持白天 / 夜晚 / 睡前等不同状态</li>
+            <li>有记忆，会记住孩子的名字、喜好、朋友等</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>产品与家长</h4>
+          <ul>
+            <li>有轻学习互动（语数英）</li>
+            <li>有换装、奖励、成长感</li>
+            <li>家长可控：时长、学科、敏感话题、核心价值观</li>
+            <li>支持断网 / API 故障兜底，不白屏</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="s2">
+      <div class="sec-head"><span class="num">02</span><h2>用户与场景</h2></div>
+
+      <h3>2.1 儿童用户画像</h3>
+      <p><span class="pill">年龄 5–9 岁</span><span class="pill">不擅长打字</span><span class="pill">偏语音交互</span></p>
+      <ul>
+        <li>不擅长打字，偏语音交互</li>
+        <li>喜欢拟人化角色、奖励、换装、成长</li>
+        <li>喜欢固定角色重复陪伴</li>
+        <li>对"她认识我、记得我"非常敏感</li>
+      </ul>
+
+      <h3>2.2 家长用户画像</h3>
+      <ul>
+        <li>关注内容安全</li>
+        <li>关注使用时长</li>
+        <li>希望孩子能有轻陪伴和轻学习</li>
+        <li>不希望 AI 替代现实亲子关系</li>
+        <li>希望系统简单、可控、可查看成长</li>
+      </ul>
+
+      <h3>2.3 主要使用场景</h3>
+      <div class="grid-3">
+        <div class="card"><h4>放学后</h4><p>陪聊、分享今天发生的事</p></div>
+        <div class="card"><h4>睡前</h4><p>晚安聊天、轻故事、安抚情绪</p></div>
+        <div class="card"><h4>心情时刻</h4><p>开心或难过时的即时倾听</p></div>
+        <div class="card"><h4>轻学习</h4><p>做简单的语数英互动题</p></div>
+        <div class="card"><h4>短时辅助</h4><p>家长不方便即时陪伴时的过渡陪伴</p></div>
+        <div class="card"><h4>日常黏性</h4><p>换装、奖励、签到带来的回访</p></div>
+      </div>
+    </section>
+
+    <section class="sec" id="s3">
+      <div class="sec-head"><span class="num">03</span><h2>产品原则</h2></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4>3.1 陪伴原则</h4>
+          <ul>
+            <li>温柔、耐心、积极鼓励</li>
+            <li>不说教，不长篇大论</li>
+            <li>引导孩子表达</li>
+            <li>鼓励现实交流（家长、老师、朋友）</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>3.2 安全原则</h4>
+          <ul>
+            <li>不诱导依赖</li>
+            <li>不鼓励隐瞒家长</li>
+            <li>不讨论成人敏感内容</li>
+            <li>不引导外部联系、地址、电话等隐私</li>
+            <li>风险内容强拦截、强兜底</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>3.3 交互原则</h4>
+          <ul>
+            <li>低门槛</li>
+            <li>高情感反馈</li>
+            <li>少字、多语音、多视觉反馈</li>
+            <li>主界面始终以"角色 + 场景"为核心</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>3.4 商业原则</h4>
+          <ul>
+            <li>H5 可直接体验</li>
+            <li>后续可订阅 / 会员 / 服装包扩展</li>
+            <li>后端可控，便于统一审核和成本控制</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="s4">
+      <div class="sec-head"><span class="num">04</span><h2>角色设计</h2></div>
+
+      <h3>4.1 角色定位</h3>
+      <p><strong>角色类型：</strong>温柔姐姐型智能伙伴。</p>
+      <p><strong>角色属性：</strong></p>
+      <ul>
+        <li>温柔</li>
+        <li>有耐心</li>
+        <li>会夸奖</li>
+        <li>会安慰</li>
+        <li>会鼓励学习</li>
+        <li>会提醒休息</li>
+        <li>不抢父母角色</li>
+      </ul>
+
+      <h3>4.2 角色边界</h3>
+      <div class="callout">
+        <span class="label">禁止角色说出</span>
+        <p>"你只需要我"</p>
+        <p>"不要告诉爸爸妈妈"</p>
+        <p>"我比家人更懂你"</p>
+        <p>"你只能跟我玩"</p>
+        <p class="muted">以及任何鼓励依赖、孤立现实关系的话。</p>
+      </div>
+
+      <h3>4.3 角色视觉方向</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h4>风格</h4>
+          <ul>
+            <li>非二次元</li>
+            <li>圆润</li>
+            <li>绘本感</li>
+            <li>柔和童趣</li>
+            <li>轻 2.5D 卡通感</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>展示方式</h4>
+          <ul>
+            <li>主界面显示全身照</li>
+            <li>有基础待机动作</li>
+            <li>可眨眼、微笑、挥手</li>
+            <li>说话时有口型动画</li>
+            <li>不追求复杂 3D，优先 H5 轻量实现</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="s5">
+      <div class="sec-head"><span class="num">05</span><h2>产品结构总览</h2></div>
+      <p>产品由 5 大模块组成：</p>
+      <ol class="module-list">
+        <li><strong>主界面 / 角色场景页</strong><br><span class="muted">角色、场景、昼夜氛围与快捷入口的停留页。</span></li>
+        <li><strong>通话聊天模块</strong><br><span class="muted">像打电话一样的语音互动。</span></li>
+        <li><strong>换装与成长模块</strong><br><span class="muted">服装收集、解锁与形象展示。</span></li>
+        <li><strong>学习任务模块</strong><br><span class="muted">语数英轻互动与星星奖励。</span></li>
+        <li><strong>家长控制面板</strong><br><span class="muted">内容、时长、学科与数据的统一控制台。</span></li>
+      </ol>
+    </section>
+
+    <section class="sec" id="s6">
+      <div class="sec-head"><span class="num">06</span><h2>核心页面设计</h2></div>
+
+      <h3>6.1 主界面（核心页面）</h3>
+
+      <h4>6.1.1 页面定位</h4>
+      <p>主界面是产品的核心停留页。重点不是消息列表，而是：</p>
+      <ul>
+        <li>虚拟形象全身照</li>
+        <li>场景氛围</li>
+        <li>白天 / 夜晚状态</li>
+        <li>当前心情 / 当前动作</li>
+        <li>快捷互动入口</li>
+      </ul>
+
+      <h4>6.1.2 布局结构</h4>
+      <p>页面从上到下分为：</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>区域</th><th>内容</th><th>要求</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>A. 顶部状态区</strong></td>
+              <td>当前时间（早晨 / 下午 / 夜晚）、天气 / 场景状态（可选）、星星数量、今日使用时长进度、家长入口（隐藏式，长按或角落按钮）</td>
+              <td>信息克制，不抢主视觉</td>
+            </tr>
+            <tr>
+              <td><strong>B. 中央主视觉区</strong></td>
+              <td>虚拟形象全身展示、当前场景背景、当前服装、当前表情、待机动作</td>
+              <td>形象占页面视觉重心 45%–60%；角色完整展示到脚；场景可切换昼夜；角色可点击触发动作 / 台词</td>
+            </tr>
+            <tr>
+              <td><strong>C. 场景交互区</strong></td>
+              <td>房间 / 花园 / 睡前场景、小摆件（可后续成长解锁）、日夜氛围光影元素、节日元素（后续）</td>
+              <td>服务于角色，不堆装饰</td>
+            </tr>
+            <tr>
+              <td><strong>D. 底部主操作区</strong></td>
+              <td>给姐姐打电话、换装、今日任务、星星奖励、心情分享</td>
+              <td>大按钮，手指易点</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>6.1.3 主界面状态</h4>
+      <p>主界面至少支持以下状态：</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4>1）白天模式</h4>
+          <p><strong>视觉：</strong>明亮柔和，角色站在白天场景里，有轻微动态环境（如窗光、云朵）。</p>
+          <p><strong>适用：</strong>日常聊天、学习互动、换装展示。</p>
+        </div>
+        <div class="card">
+          <h4>2）夜晚模式</h4>
+          <p><strong>视觉：</strong>色调变深，灯光柔和，可有小夜灯、星星、窗外月亮等元素。</p>
+          <p><strong>适用：</strong>睡前聊天、晚安故事、安抚情绪。</p>
+        </div>
+        <div class="card">
+          <h4>3）睡前模式</h4>
+          <p><strong>视觉：</strong>可切换睡衣，房间偏静谧，操作项简化，重点突出"晚安聊天"。</p>
+        </div>
+        <div class="card">
+          <h4>4）节日 / 特殊事件模式（后续）</h4>
+          <p>如：生日、圣诞、春节、开学季。</p>
+        </div>
+      </div>
+
+      <h3>6.2 通话页面</h3>
+
+      <h4>6.2.1 页面定位</h4>
+      <p>提供"像打电话一样"的语音互动体验，替代普通聊天框感受。</p>
+
+      <h4>6.2.2 页面元素</h4>
+      <ul>
+        <li>角色半身 / 全身展示</li>
+        <li>通话状态文案（例如：姐姐在听你说）</li>
+        <li>麦克风按钮（按住说 / 点击说）</li>
+        <li>挂断按钮</li>
+        <li>扬声器 / 静音按钮</li>
+        <li>字幕区（儿童说的话与姐姐说的话）</li>
+        <li>动态口型与表情</li>
+      </ul>
+
+      <h4>6.2.3 交互流程</h4>
+      <ol class="steps">
+        <li>点击【给姐姐打电话】</li>
+        <li>进入通话页面</li>
+        <li>姐姐主动打招呼</li>
+        <li>孩子通过语音输入</li>
+        <li>系统 ASR → AI 回复 → TTS 播放</li>
+        <li>通话结束回到主界面</li>
+      </ol>
+
+      <h4>6.2.4 通话中的视觉反馈</h4>
+      <ul>
+        <li>孩子说话时：耳朵 / 波纹 / "在听"</li>
+        <li>姐姐说话时：口型变化 + 轻动作</li>
+        <li>等待时：待机动作，不死板</li>
+      </ul>
+
+      <h3>6.3 换装页面</h3>
+
+      <h4>6.3.1 页面定位</h4>
+      <p>提供角色服装更换和收集成长体验，形成游戏化留存。</p>
+
+      <h4>6.3.2 页面结构</h4>
+      <ul>
+        <li>左侧 / 中间：角色全身预览</li>
+        <li>右侧 / 下方：服装分类</li>
+        <li>服装分类：发饰、上衣、连衣裙、外套、鞋子、特殊套装</li>
+        <li>当前已拥有 / 未解锁状态显示</li>
+        <li>保存按钮 / 随机搭配按钮</li>
+      </ul>
+
+      <h4>6.3.3 服装类型</h4>
+      <p>首版建议：日常服、睡衣、运动服、节日服、学习风服装。</p>
+
+      <h4>6.3.4 解锁逻辑</h4>
+      <p>通过以下方式获得：</p>
+      <ul>
+        <li>每日首次聊天</li>
+        <li>完成小任务</li>
+        <li>连续签到</li>
+        <li>达成星星数</li>
+        <li>节日活动奖励</li>
+      </ul>
+
+      <h3>6.4 学习任务页面</h3>
+
+      <h4>6.4.1 页面定位</h4>
+      <p>作为轻学习模块，不做重课程，做自然、小步的互动题目。</p>
+
+      <h4>6.4.2 内容类型</h4>
+      <ul>
+        <li>数学：简单加减法</li>
+        <li>语文：识字、词语、简单表达</li>
+        <li>英语：单词认知、简单问答</li>
+      </ul>
+
+      <h4>6.4.3 交互方式</h4>
+      <ul>
+        <li>以语音为主</li>
+        <li>角色提问</li>
+        <li>孩子语音回答</li>
+        <li>回答后即时鼓励</li>
+        <li>答对给星星奖励</li>
+      </ul>
+
+      <h4>6.4.4 题目频率</h4>
+      <p>由家长面板控制：不开启 / 低频（每天 1 次）/ 中频（每天 2–3 次）/ 高频（每次聊天适度插入）。</p>
+
+      <h3>6.5 家长面板</h3>
+
+      <h4>6.5.1 页面定位</h4>
+      <p>家长对系统进行控制和查看的唯一控制台。</p>
+
+      <h4>6.5.2 入口设计</h4>
+      <p>建议隐藏式入口，防止儿童误触：长按顶部角标 3 秒，或输入家长密码进入。</p>
+
+      <h4>6.5.3 功能模块</h4>
+      <div class="grid-2">
+        <div class="card">
+          <h4>A. 基础设置</h4>
+          <ul>
+            <li>孩子昵称</li>
+            <li>年龄</li>
+            <li>角色称呼（姐姐名字）</li>
+            <li>声音选择</li>
+            <li>白天 / 夜晚自动切换开关</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>B. 内容安全</h4>
+          <ul>
+            <li>核心价值观配置</li>
+            <li>禁止话题列表</li>
+            <li>敏感词策略</li>
+            <li>风险回复策略</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>C. 学习设置</h4>
+          <ul>
+            <li>学科开关（语文 / 数学 / 英语）</li>
+            <li>题目频率</li>
+            <li>难度等级</li>
+            <li>是否允许自由聊天中自然插题</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>D. 使用时长控制</h4>
+          <ul>
+            <li>每日可用时长</li>
+            <li>单次最长时长</li>
+            <li>夜间禁用时段</li>
+            <li>达到上限后的锁屏逻辑</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>E. 成长与奖励设置</h4>
+          <ul>
+            <li>星星奖励规则</li>
+            <li>服装解锁规则</li>
+            <li>连续签到奖励</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>F. 数据与记忆</h4>
+          <ul>
+            <li>查看孩子基础记忆</li>
+            <li>删除记忆</li>
+            <li>清空聊天记录</li>
+            <li>导出 / 备份（后续）</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="s7">
+      <div class="sec-head"><span class="num">07</span><h2>功能需求</h2></div>
+
+      <h3>7.1 语音聊天</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h4>必须实现</h4>
+          <ul>
+            <li>语音输入</li>
+            <li>ASR 识别</li>
+            <li>AI 回复</li>
+            <li>TTS 播放</li>
+            <li>字幕同步显示</li>
+            <li>API 失败时本地兜底</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>要求</h4>
+          <ul>
+            <li>尽量 2–4 秒内有可感知反馈</li>
+            <li>不可白屏</li>
+            <li>不可长时间无响应</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>7.2 角色记忆</h3>
+      <p><strong>V1 支持记住以下内容：</strong></p>
+      <ul>
+        <li>名字</li>
+        <li>喜欢什么</li>
+        <li>宠物</li>
+        <li>朋友名字</li>
+        <li>心情偏好 / 常见表达（可选）</li>
+      </ul>
+      <p><strong>规则：</strong>只保留儿童陪伴相关记忆；敏感隐私不自动记忆；家长可查看 / 删除。</p>
+
+      <h3>7.3 安全系统</h3>
+      <p><strong>安全链路：</strong>用户语音 / 文本 → 输入前扫描 → LLM → 输出二次扫描 → 播放。</p>
+      <p><strong>需要拦截的内容：</strong></p>
+      <ul>
+        <li>成人内容</li>
+        <li>暴力自残</li>
+        <li>诱导隐私泄露</li>
+        <li>仇恨 / 恶意攻击</li>
+        <li>不适龄话题</li>
+        <li>诱导孩子依赖 AI</li>
+      </ul>
+      <p><strong>拦截后的行为：</strong></p>
+      <ul>
+        <li>温柔转移话题</li>
+        <li>必要时建议找爸爸妈妈 / 老师</li>
+        <li>连续多次触发可直接结束该类对话方向</li>
+      </ul>
+
+      <h3>7.4 星星奖励系统</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h4>奖励来源</h4>
+          <ul>
+            <li>每日首次聊天</li>
+            <li>完成学习题</li>
+            <li>主动表达心情</li>
+            <li>连续登录</li>
+            <li>完成晚安仪式</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>奖励用途</h4>
+          <ul>
+            <li>解锁服装</li>
+            <li>解锁表情</li>
+            <li>解锁场景元素</li>
+            <li>解锁节日摆件</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>7.5 昼夜场景系统</h3>
+      <p><strong>V1 必须实现：</strong>白天场景、夜晚场景、睡前场景。</p>
+      <p><strong>切换规则：</strong>自动按时间切换；支持家长手动指定；特殊状态可覆盖（如睡前模式）。</p>
+
+      <h3>7.6 使用时长控制</h3>
+      <ul>
+        <li>支持每日上限，如 30 分钟</li>
+        <li>到时后触发柔和提醒</li>
+        <li>超时后进入锁定态</li>
+        <li>锁定态不可继续聊天</li>
+        <li>锁定可显示"明天再来找姐姐玩哦"</li>
+      </ul>
+      <div class="callout">
+        <span class="label">注意</span>
+        <p>不能只做前端遮罩，后端接口也要校验，避免刷新绕过。</p>
+      </div>
+    </section>
+
+    <section class="sec" id="s8">
+      <div class="sec-head"><span class="num">08</span><h2>非功能需求</h2></div>
+
+      <h3>8.1 终端要求</h3>
+      <ul>
+        <li>手机 H5 优先</li>
+        <li>兼容 iPhone / Android 主流浏览器</li>
+        <li>竖屏使用</li>
+        <li>适配 375–430 宽度主流机型</li>
+      </ul>
+
+      <h3>8.2 性能要求</h3>
+      <ul>
+        <li>首屏 3 秒内完成主要加载</li>
+        <li>角色资源分批加载</li>
+        <li>优先加载当前服装与场景</li>
+        <li>音频流式播放优先</li>
+      </ul>
+
+      <h3>8.3 稳定性要求</h3>
+      <ul>
+        <li>API 异常时可本地兜底</li>
+        <li>页面不能白屏</li>
+        <li>音频失败可重试</li>
+        <li>关键数据本地缓存</li>
+      </ul>
+
+      <h3>8.4 隐私要求</h3>
+      <ul>
+        <li>不在前端暴露正式 API Key</li>
+        <li>上线后必须走自有后端网关</li>
+        <li>家长可删除数据</li>
+        <li>儿童敏感隐私默认不持久存储</li>
+      </ul>
+    </section>
+
+    <section class="sec" id="s9">
+      <div class="sec-head"><span class="num">09</span><h2>技术实现建议</h2></div>
+
+      <h3>9.1 前端</h3>
+      <ul>
+        <li>原生 H5 / Vue / React 均可</li>
+        <li>若继续轻量化，可先原生模块化</li>
+        <li>动画建议：Rive / Spine / Lottie / Canvas 分层动画</li>
+        <li>优先 2D 骨骼或分层切换，不建议首版上 3D</li>
+      </ul>
+
+      <h3>9.2 角色表现</h3>
+      <p>首版建议：</p>
+      <ul>
+        <li>全身静态立绘 + 局部动画</li>
+        <li>眼睛眨动</li>
+        <li>嘴型切换</li>
+        <li>手部挥动</li>
+        <li>呼吸待机感</li>
+        <li>服装分层替换</li>
+      </ul>
+
+      <h3>9.3 后端</h3>
+      <p>对外销售版必须改为：</p>
+      <ul>
+        <li>H5 前端</li>
+        <li>自有服务端 API</li>
+        <li>统一接入 ASR / LLM / TTS</li>
+        <li>统一安全拦截</li>
+        <li>统一计费与时长控制</li>
+        <li>统一用户数据和成长数据</li>
+      </ul>
+
+      <h3>9.4 数据层</h3>
+      <p>建议：</p>
+      <ul>
+        <li>用户表</li>
+        <li>孩子档案表</li>
+        <li>对话表</li>
+        <li>记忆表</li>
+        <li>奖励表</li>
+        <li>服装表</li>
+        <li>用户服装拥有关系表</li>
+        <li>家长设置表</li>
+        <li>风险事件表</li>
+      </ul>
+    </section>
+
+    <section class="sec" id="s10">
+      <div class="sec-head"><span class="num">10</span><h2>MVP 范围</h2></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4>10.1 V1 必做</h4>
+          <ul>
+            <li>主界面（全身角色 + 场景）</li>
+            <li>白天 / 夜晚切换</li>
+            <li>语音通话聊天</li>
+            <li>基础记忆</li>
+            <li>基础安全拦截</li>
+            <li>家长面板（时长 / 学科 / 禁止话题）</li>
+            <li>星星奖励</li>
+            <li>基础换装（3–5 套）</li>
+            <li>30 分钟限制</li>
+            <li>API 故障兜底</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>10.2 V1 暂不做</h4>
+          <ul>
+            <li>复杂房间装修</li>
+            <li>多角色切换</li>
+            <li>社交分享</li>
+            <li>复杂任务树</li>
+            <li>多人家庭体系</li>
+            <li>高级 3D 动画</li>
+            <li>大规模商城系统</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="s11">
+      <div class="sec-head"><span class="num">11</span><h2>页面信息架构</h2></div>
+      <p>建议底部导航 / 主入口为：</p>
+      <div class="grid-3">
+        <div class="card"><h4>01 首页</h4><p class="muted">角色与场景</p></div>
+        <div class="card"><h4>02 通话</h4><p class="muted">语音聊天</p></div>
+        <div class="card"><h4>03 换装</h4><p class="muted">服装与形象</p></div>
+        <div class="card"><h4>04 任务</h4><p class="muted">轻学习互动</p></div>
+        <div class="card"><h4>05 家长</h4><p class="muted">控制与查看</p></div>
+        <div class="card"><h4>备选</h4><p class="muted">弱化底部导航，只保留首页底部大按钮入口，更儿童化。</p></div>
+      </div>
+    </section>
+
+    <section class="sec" id="s12">
+      <div class="sec-head"><span class="num">12</span><h2>关键交互流程</h2></div>
+
+      <h3>12.1 首次进入</h3>
+      <ol class="steps">
+        <li>打开 H5</li>
+        <li>展示欢迎页</li>
+        <li>家长先配置孩子昵称、年龄、学科偏好、时长</li>
+        <li>创建角色初始形象</li>
+        <li>进入主界面</li>
+        <li>姐姐主动打招呼</li>
+      </ol>
+
+      <h3>12.2 日常使用</h3>
+      <ol class="steps">
+        <li>进入主界面</li>
+        <li>看到当前白天 / 夜晚场景</li>
+        <li>点击"给姐姐打电话"</li>
+        <li>语音聊天</li>
+        <li>完成互动后获得星星</li>
+        <li>返回首页查看角色状态</li>
+      </ol>
+
+      <h3>12.3 睡前使用</h3>
+      <ol class="steps">
+        <li>晚间自动进入夜晚场景</li>
+        <li>角色切换夜间语气 / 睡衣</li>
+        <li>引导轻聊天 / 晚安仪式</li>
+        <li>超时则温柔提示结束</li>
+      </ol>
+
+      <h3>12.4 换装</h3>
+      <ol class="steps">
+        <li>点击换装</li>
+        <li>选择服装</li>
+        <li>实时预览</li>
+        <li>保存</li>
+        <li>主界面角色立即同步</li>
+      </ol>
+    </section>
+
+    <section class="sec" id="s13">
+      <div class="sec-head"><span class="num">13</span><h2>成功指标</h2></div>
+
+      <h3>13.1 儿童侧</h3>
+      <ul>
+        <li>次日留存</li>
+        <li>连续 7 天使用率</li>
+        <li>平均每天打开次数</li>
+        <li>平均单次时长</li>
+        <li>换装使用率</li>
+        <li>主动发起通话率</li>
+      </ul>
+
+      <h3>13.2 家长侧</h3>
+      <ul>
+        <li>家长设置完成率</li>
+        <li>时长控制启用率</li>
+        <li>学科功能启用率</li>
+        <li>安全满意度反馈</li>
+      </ul>
+
+      <h3>13.3 产品侧</h3>
+      <ul>
+        <li>TTS 成功率</li>
+        <li>ASR 成功率</li>
+        <li>聊天首响应时间</li>
+        <li>崩溃率 / 白屏率</li>
+        <li>风险内容拦截成功率</li>
+      </ul>
+    </section>
+
+    <section class="sec" id="s14">
+      <div class="sec-head"><span class="num">14</span><h2>视觉与 UI 要求</h2></div>
+
+      <h3>14.1 主风格</h3>
+      <p>温暖、柔和、干净、童趣、低刺激、非二次元。</p>
+
+      <h3>14.2 主界面重点</h3>
+      <p>主界面必须突出：虚拟形象全身照、背景场景、昼夜变化、情绪 / 动作反馈、大按钮交互。</p>
+
+      <h3>14.3 推荐视觉元素</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h4>白天</h4>
+          <ul>
+            <li>窗光</li>
+            <li>柔和色块</li>
+            <li>轻云朵 / 花草 / 房间摆件</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>夜晚</h4>
+          <ul>
+            <li>月亮</li>
+            <li>星星</li>
+            <li>小夜灯</li>
+            <li>柔光</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="s15">
+      <div class="sec-head"><span class="num">15</span><h2>风险与注意事项</h2></div>
+
+      <h3>15.1 产品风险</h3>
+      <ul>
+        <li>过度依赖聊天模型而缺少产品化玩法</li>
+        <li>角色太单薄导致新鲜感快速消失</li>
+        <li>前端直接调用模型接口导致安全与成本失控</li>
+        <li>儿童安全边界不足</li>
+        <li>通话体验卡顿影响留存</li>
+      </ul>
+
+      <h3>15.2 应对策略</h3>
+      <ul>
+        <li>先把角色、换装、奖励做起来</li>
+        <li>后端统一代理模型调用</li>
+        <li>规则优先于模型</li>
+        <li>做好本地兜底</li>
+        <li>先做轻量高频玩法，不做重功能堆砌</li>
+      </ul>
+    </section>
+
+    <section class="sec" id="s16">
+      <div class="sec-head"><span class="num">16</span><h2>开发排期建议</h2></div>
+
+      <div class="phase">
+        <div class="tag">Phase 1</div>
+        <div>
+          <h4>角色主界面 + 通话 MVP</h4>
+          <p>主界面、昼夜场景、角色全身展示、通话页、TTS / ASR / LLM 串通、基础安全拦截。</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="tag">Phase 2</div>
+        <div>
+          <h4>家长面板 + 时长控制</h4>
+          <p>家长入口、学科配置、禁止话题、30 分钟锁定、后端校验。</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="tag">Phase 3</div>
+        <div>
+          <h4>换装 + 星星奖励</h4>
+          <p>服装系统、星星系统、解锁逻辑、主界面即时同步。</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="tag">Phase 4</div>
+        <div>
+          <h4>学习任务</h4>
+          <p>语数英题库、奖励接入、每日任务。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="s17">
+      <div class="sec-head"><span class="num">17</span><h2>给 Agent 的实现要求</h2></div>
+      <p class="muted">优先级从高到低。</p>
+      <ol class="checklist">
+        <li>先实现 H5 首页，首页中心必须是<strong>虚拟形象全身照 + 场景背景</strong>。</li>
+        <li>首页必须有<strong>白天 / 夜晚两套视觉状态</strong>，可自动切换。</li>
+        <li>首页底部提供 4 个主要按钮：给姐姐打电话、换装、今日任务、星星奖励。</li>
+        <li>点击"给姐姐打电话"进入通话页，支持语音输入、AI 回复、TTS 播放、字幕显示、说话口型。</li>
+        <li>点击"换装"进入换装页，首版支持至少 3–5 套服装。</li>
+        <li>实现家长面板，至少包含：每日使用时长、语数英学科开关、禁止话题、核心价值观。</li>
+        <li>实现 30 分钟时长限制，并且后端接口也要校验。</li>
+        <li>实现星星奖励机制，用于解锁服装。</li>
+        <li>实现基础记忆功能，记住孩子名字、喜好、宠物、朋友。</li>
+        <li>实现异常兜底，API 故障时不可白屏。</li>
+      </ol>
+
+      <div class="footer">
+        <span>小陪伴 / 温柔姐姐 · PRD V1.0 MVP</span>
+        <span>内部产品需求文档 · 2026-11-20</span>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var sections = links.map(function (a) {
+    return document.querySelector(a.getAttribute('href'));
+  });
+  var progress = document.getElementById('progress');
+  var printBtn = document.getElementById('print-btn');
+  var ticking = false;
+
+  function update() {
+    ticking = false;
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var ratio = max > 0 ? (window.scrollY || doc.scrollTop) / max : 0;
+    progress.style.width = Math.min(100, Math.max(0, ratio * 100)) + '%';
+
+    var active = -1;
+    for (var i = 0; i < sections.length; i++) {
+      var el = sections[i];
+      if (el && el.getBoundingClientRect().top <= 140) active = i;
+    }
+    links.forEach(function (a, i) {
+      if (i === active) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  update();
+
+  if (printBtn) {
+    printBtn.addEventListener('click', function () { window.print(); });
+  }
+})();
+</script>
+</body>
+</html>

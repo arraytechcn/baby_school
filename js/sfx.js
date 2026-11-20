@@ -30,6 +30,7 @@ function tone(freqStart, freqEnd, dur, type = 'sine', delay = 0) {
 }
 
 export const sfx = {
+  get volume() { return volume; },
   setVolume(v) { volume = Math.min(1, Math.max(0, v)); },
   correct() { tone(880, 1320, 0.35, 'sine'); },                          // 叮，<0.5s
   wrong()   { tone(320, 220, 0.45, 'triangle'); },                        // 柔和"唔"

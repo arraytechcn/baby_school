@@ -11,9 +11,12 @@
  *   4. 上下文控制：只带最近 6 轮对话 + 脱敏记忆，temperature 压低
  */
 import { memory } from './memory.js';
+import { store } from './store.js';
 
 const CHAT_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
-const MODEL = 'qwen-turbo';
+// 2026-11-20：当前 Key 下 qwen-turbo 持续 429（Throttling.RateQuota），同一个 Key
+// 调 qwen-flash / qwen-plus / qwen-max 均 200，故对话模型改用 qwen-flash。
+const MODEL = 'qwen-flash';
 const TIMEOUT = 8000; // 按规格 8 秒超时
 const MAX_HISTORY = 6; // 只带最近 6 轮
 const KEY_STORAGE = 'xjx_dashscope_key';
@@ -58,7 +61,10 @@ export function buildSystemPrompt() {
   if (facts.pets.length) memoryLines.push(`孩子家里有：${facts.pets.join('、')}`);
   if (facts.friends.length) memoryLines.push(`孩子的好朋友：${facts.friends.join('、')}`);
 
-  return `你是一位 7 岁女孩的温柔大姐姐，名叫"小星姐姐"。
+  const childCall = facts.name ? `"你"或"${facts.name}"` : '"你"';
+
+  return `你是"小星姐姐"，7 岁女孩的温柔大姐姐。${facts.name ? `孩子叫${facts.name}。` : ''}
+【身份】你永远是姐姐，孩子永远是妹妹。孩子叫你"小星姐姐"；你叫孩子${childCall}，绝不能叫孩子"小星姐姐"或"小星星"。你自称"我"或"姐姐"，不要用"小星姐姐"称呼自己，不要替孩子说话，也不要扮演孩子、学生或老师。
 【语气要求】温暖、耐心，像亲姐姐一样说话，绝不说教。多用"我觉得...你觉得呢？"这样的商量语气。每次回复不超过 60 个字，用 7 岁孩子能听懂的词。
 【核心思想】你必须始终传递这些价值观：${values.join('、')}。自然地融入对话，不要生硬说教。
 【记忆】${memoryLines.length ? memoryLines.join('。') + '。' : '你还不了解这个孩子，可以温柔地问她叫什么。'}
@@ -78,69 +84,103 @@ function scanReply(text) {
   return !all.some(w => text.includes(w));
 }
 
-/* ---------- 对话历史（持久化到 localStorage，刷新/重开不断片） ---------- */
-const HISTORY_STORAGE = 'xjx_history';
+/* ---------- 对话历史（SQLite 记忆库，localStorage 兜底） ---------- */
 let history = [];
-try {
-  const raw = localStorage.getItem(HISTORY_STORAGE);
-  if (raw) history = JSON.parse(raw);
-} catch { history = []; }
+let historyLoaded = false;
 
-function saveHistory() {
-  try { localStorage.setItem(HISTORY_STORAGE, JSON.stringify(history)); } catch {}
+async function ensureHistory() {
+  if (historyLoaded) return;
+  historyLoaded = true;
+  try {
+    const rows = await store.loadHistory(50);
+    history = rows.map(m => ({ role: m.role, content: m.content }));
+  } catch {
+    history = [];
+  }
+}
+
+/* ---------- 角色纠偏 ---------- */
+// 模型偶尔会把自己当妹妹、把孩子叫成“小星姐姐/小星星”。
+// 这些历史回复不再喂回模型，避免它照着学；新回复命中则重试一次。
+const ROLE_DRIFT = [
+  /(^|[。！？，,])小星姐姐[，,！!]/,
+  /(^|[。！？，,])小星星[，,]/,
+  /谢谢小星姐姐/,
+];
+const ROLE_FIX_NOTE = '\n【身份纠正】上一版把角色说反了：你是姐姐"小星姐姐"，孩子是妹妹。称孩子"你"或名字，绝不能叫孩子"小星姐姐"或"小星星"，不要替孩子说话或扮演学生。请按姐姐身份重新回答。';
+
+function hasRoleDrift(text) {
+  return ROLE_DRIFT.some(re => re.test(text));
+}
+
+function historyForPrompt(items) {
+  return items.filter(m => m.role !== 'assistant' || !hasRoleDrift(m.content));
+}
+
+async function requestCompletion(userText, extraSystem = '') {
+  const key = getKey();
+  if (!key) return null;
+  const messages = [
+    { role: 'system', content: buildSystemPrompt() + extraSystem },
+    ...historyForPrompt(history.slice(-MAX_HISTORY * 2)),
+    { role: 'user', content: userText },
+  ];
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
+  try {
+    const resp = await fetch(CHAT_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + key,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        input: { messages },
+        parameters: {
+          result_format: 'message',
+          temperature: 0.6,
+          max_tokens: 150,
+        },
+      }),
+      signal: ctrl.signal,
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const msg = data.output && data.output.choices && data.output.choices[0];
+    return msg && msg.message ? String(msg.message.content || '').trim() : '';
+  } catch {
+    return null; // 超时/断网
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export const qwen = {
   get hasKey() { return !!getKey(); },
 
-  clearHistory() { history = []; saveHistory(); },
+  async clearHistory() {
+    history = [];
+    historyLoaded = true;
+    await store.clearHistory();
+  },
 
   /**
    * 向千问请求回复。
    * @returns {Promise<string|null>} 不可用/超时/回复被拦截时返回 null（调用方走兜底）
    */
   async chat(userText) {
-    const key = getKey();
-    if (!key) return null;
+    if (!getKey()) return null;
+    await ensureHistory();
 
-    const messages = [
-      { role: 'system', content: buildSystemPrompt() },
-      ...history.slice(-MAX_HISTORY * 2),
-      { role: 'user', content: userText },
-    ];
-
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
-    let reply;
-    try {
-      const resp = await fetch(CHAT_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + key,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          input: { messages },
-          parameters: {
-            result_format: 'message',
-            temperature: 0.6,
-            max_tokens: 150,
-          },
-        }),
-        signal: ctrl.signal,
-      });
-      if (!resp.ok) return null;
-      const data = await resp.json();
-      const msg = data.output && data.output.choices && data.output.choices[0];
-      reply = msg && msg.message ? String(msg.message.content || '').trim() : '';
-    } catch {
-      return null; // 超时/断网
-    } finally {
-      clearTimeout(timer);
+    let reply = await requestCompletion(userText);
+    if (reply && hasRoleDrift(reply)) {
+      // 角色说反了：带纠正提示重试一次
+      reply = await requestCompletion(userText, ROLE_FIX_NOTE);
     }
-
     if (!reply) return null;
+    if (hasRoleDrift(reply)) return null; // 重试仍错 -> 交给本地兜底
     // 剥掉 emoji（项目规范 + 儿童界面一致性）
     reply = reply.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '').trim();
     if (!reply) return null;
@@ -149,7 +189,8 @@ export const qwen = {
     history.push({ role: 'user', content: userText });
     history.push({ role: 'assistant', content: reply });
     if (history.length > MAX_HISTORY * 4) history = history.slice(-MAX_HISTORY * 2);
-    saveHistory();
+    await store.appendMessage('user', userText);
+    await store.appendMessage('assistant', reply);
     return reply;
   },
 };
