@@ -171,6 +171,21 @@ export const qwen = {
   },
 
   /**
+   * 画完画后的一句反馈（只看颜色/笔数，不存储对话）。
+   * @returns {Promise<string|null>}
+   */
+  async drawingFeedback({ prompt, colors, strokes }) {
+    const colorText = colors && colors.length ? colors.join('、') : '好几种颜色';
+    const userText = `（姐姐，我刚画完一幅画。题目是"${prompt}"，我用了${colorText}，画了大约 ${strokes} 笔。请夸夸我，并问问我画的是什么，30 个字以内。）`;
+    let reply = await requestCompletion(userText);
+    if (!reply) return null;
+    reply = reply.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '').trim();
+    if (!reply) return null;
+    if (!scanReply(reply)) return null;
+    return reply;
+  },
+
+  /**
    * 向千问请求回复。
    * @returns {Promise<string|null>} 不可用/超时/回复被拦截时返回 null（调用方走兜底）
    */

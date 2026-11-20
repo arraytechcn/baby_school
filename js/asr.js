@@ -23,6 +23,9 @@ const KEY_STORAGE = 'xjx_dashscope_key';
 const MAX_RECORD_MS = 20000; // 最长录音 20 秒，防孩子按住不放
 const FIRST_INTERIM_MS = 900; // 第一次实时上屏：尽早出字
 const INTERIM_MS = 1400;      // 之后的前缀识别间隔
+const VAD_TICK_MS = 100;      // 音量采样间隔
+const VAD_CALIBRATION_MS = 400; // 开头静音校准
+const VAD_SILENCE_MS = 1200;  // 说完后静音多久算一轮结束
 
 function getKey() {
   const s = localStorage.getItem(KEY_STORAGE);
@@ -89,6 +92,82 @@ async function openMic() {
   return navigator.mediaDevices.getUserMedia({ audio: true });
 }
 
+/* ---------- 静音检测（免提连续通话用） ---------- */
+let vadCtx = null;
+let vadTimer = null;
+let vadAnalyser = null;
+let vadSpeech = false;
+let vadSilenceAt = 0;
+let vadNoise = 0.008;
+let vadOnSilence = null;
+
+function stopVad() {
+  if (vadTimer) { clearInterval(vadTimer); vadTimer = null; }
+  if (vadCtx) {
+    try { vadCtx.close(); } catch {}
+    vadCtx = null;
+  }
+  vadAnalyser = null;
+  vadOnSilence = null;
+  vadSpeech = false;
+  vadSilenceAt = 0;
+}
+
+function startVad(stream, onSilence) {
+  stopVad();
+  vadOnSilence = onSilence || null;
+  if (!vadOnSilence) return;
+  try {
+    vadCtx = new (window.AudioContext || window.webkitAudioContext)();
+    vadCtx.resume().catch(() => {});
+    const source = vadCtx.createMediaStreamSource(stream);
+    vadAnalyser = vadCtx.createAnalyser();
+    vadAnalyser.fftSize = 512;
+    source.connect(vadAnalyser);
+  } catch {
+    vadOnSilence = null;
+    return;
+  }
+  const data = new Uint8Array(vadAnalyser.fftSize);
+  const startedAt = performance.now();
+  const noiseSamples = [];
+  vadSpeech = false;
+  vadSilenceAt = 0;
+
+  vadTimer = setInterval(() => {
+    if (!vadAnalyser || !vadOnSilence) return;
+    vadAnalyser.getByteTimeDomainData(data);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+      const v = (data[i] - 128) / 128;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / data.length);
+    if (performance.now() - startedAt < VAD_CALIBRATION_MS) {
+      noiseSamples.push(rms);
+      vadNoise = Math.min(0.012, Math.max(0.004, noiseSamples.reduce((a, b) => a + b, 0) / noiseSamples.length));
+      return;
+    }
+    const speechLevel = Math.max(0.020, vadNoise * 3);
+    const silenceLevel = Math.max(0.012, vadNoise * 1.8);
+    if (rms > speechLevel) {
+      vadSpeech = true;
+      vadSilenceAt = 0;
+    } else if (vadSpeech && rms < silenceLevel) {
+      if (!vadSilenceAt) vadSilenceAt = performance.now();
+      else if (performance.now() - vadSilenceAt > VAD_SILENCE_MS) {
+        vadSpeech = false;
+        vadSilenceAt = 0;
+        const cb = vadOnSilence;
+        vadOnSilence = null;
+        cb && cb();
+      }
+    } else if (rms >= silenceLevel) {
+      vadSilenceAt = 0;
+    }
+  }, VAD_TICK_MS);
+}
+
 export const asr = {
   get supported() {
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
@@ -102,7 +181,7 @@ export const asr = {
    * @param {function} onAutoStop 超最长时长自动停
    * @returns {Promise<boolean>} 麦克风授权失败返回 false
    */
-  async startLive(onPartial, onAutoStop) {
+  async startLive(onPartial, onAutoStop, onSilence) {
     if (liveActive) return true;
     try {
       liveStream = await openMic();
@@ -110,6 +189,7 @@ export const asr = {
       return false;
     }
     liveActive = true;
+    startVad(liveStream, onSilence);
     liveChunks = [];
     liveOnPartial = onPartial;
     interimBusy = false;
@@ -124,6 +204,11 @@ export const asr = {
       interimTimer = setTimeout(async () => {
         if (!liveActive || !liveRecorder) return;
         if (interimBusy) {
+          scheduleInterim(INTERIM_MS);
+          return;
+        }
+        // 免提模式下没检测到人声就不传音频，省调用；按住说话模式没有 VAD，照常识别
+        if (vadTimer && !vadSpeech) {
           scheduleInterim(INTERIM_MS);
           return;
         }
@@ -160,6 +245,28 @@ export const asr = {
    * 结束录音，用完整音频做最终识别并返回全文。
    * @returns {Promise<string>} 失败或空返回 ''
    */
+  /** ASR 一旦出字，就告诉 VAD 已经检测到人声（防止开头太轻没触发） */
+  noteSpeech() {
+    if (liveActive) {
+      vadSpeech = true;
+      vadSilenceAt = 0;
+    }
+  },
+
+  abortLive() {
+    clearTimeout(maxTimer);
+    clearTimeout(interimTimer);
+    const rec = liveRecorder;
+    liveRecorder = null;
+    if (rec && rec.state !== 'inactive') {
+      rec.ondataavailable = null;
+      try { rec.stop(); } catch {}
+    }
+    liveChunks = [];
+    liveActive = false;
+    cleanupStream();
+  },
+
   stopLive() {
     clearTimeout(maxTimer);
     clearInterval(interimTimer);
@@ -248,6 +355,7 @@ export const asr = {
 
 function cleanupStream() {
   liveActive = false;
+  stopVad();
   if (liveStream) {
     liveStream.getTracks().forEach(t => t.stop());
     liveStream = null;

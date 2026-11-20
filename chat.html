@@ -556,6 +556,7 @@
   }
   .call-mic svg { width: 36px; height: 36px; }
   .call-mic.recording { background: #ff8a4d; transform: scale(1.08); }
+  .call-mic.listening { box-shadow: 0 0 0 8px rgba(255, 179, 126, 0.18), 0 6px 18px rgba(255, 150, 90, 0.35); }
   .call-hangup {
     width: 54px; height: 54px; border-radius: 50%; border: none;
     background: #FBE3DC; color: #C4552F;
@@ -604,6 +605,13 @@
   }
   .sheet.show { display: flex; }
   #dress-sheet { background: linear-gradient(180deg, rgba(59,49,42,0) 0%, rgba(59,49,42,0.32) 55%); }
+  #task-sheet { align-items: center; padding: 20px; background: rgba(59,49,42,0.35); }
+  #task-sheet .sheet-card {
+    width: min(560px, 100%);
+    max-height: 86vh;
+    border-radius: 24px;
+    padding: 18px 20px 22px;
+  }
   .sheet-card {
     width: min(760px, 100%);
     max-height: 78vh; overflow-y: auto;
@@ -644,6 +652,31 @@
   }
   .hw-tab.active { border-color: #FFB37E; background: #FFF3E0; color: #A8471F; font-weight: 600; }
   .hw-tab.done { color: #5E7C62; }
+  .draw-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .draw-canvas-wrap { border: 2px solid #F0DCC8; border-radius: 16px; overflow: hidden; background: #fff; }
+  #draw-canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+  .draw-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .draw-colors { display: flex; gap: 6px; flex-wrap: wrap; }
+  .draw-swatch {
+    width: 28px; height: 28px; border-radius: 50%; padding: 0;
+    border: 2px solid #fff; box-shadow: 0 0 0 1px #E6D8C5; cursor: pointer;
+  }
+  .draw-swatch.active { box-shadow: 0 0 0 2px #A8471F; }
+  .draw-btn {
+    min-height: 38px; border-radius: 12px; border: 1px solid #F0DCC8;
+    background: #fff; color: #5a4a42; font: inherit; font-size: 14px;
+    padding: 0 14px; cursor: pointer;
+  }
+  .draw-btn.primary { background: #FFB37E; border-color: #FFB37E; color: #fff; font-weight: 600; }
+  .draw-btn.ghost { background: #F6E7D8; }
+  .draw-voice { font-size: 12.5px; color: #a08b80; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  #draw-voice-text { flex-basis: 100%; margin-top: 2px; color: #6b5648; line-height: 1.5; min-height: 1.2em; }
+  .draw-feedback { text-align: center; }
+  .draw-feedback img {
+    width: 64%; max-height: 220px; object-fit: contain;
+    border-radius: 12px; border: 1px solid #F0DCC8; background: #fff;
+    margin: 8px auto; display: block;
+  }
   .task-progress { display: flex; gap: 6px; margin: 2px 0 12px; }
   .task-dot { width: 8px; height: 8px; border-radius: 50%; background: #E6D8C5; }
   .task-dot.done { background: #FFB37E; }
@@ -780,10 +813,10 @@
           <path class="ch-skirt" d="M82 236 L138 236 L158 300 C158 310 150 316 140 316 H80 C70 316 62 310 62 300 Z"/>
 
           <!-- 上衣与袖子 -->
-          <path class="ch-top" d="M84 158 C78 168 76 184 78 204 L80 242 H140 L142 204 C144 184 142 168 136 158 Z"/>
-          <path class="ch-top" d="M84 158 C74 164 70 176 72 188 L86 186 L92 164 Z"/>
-          <path class="ch-top" d="M136 158 C146 164 150 176 148 188 L134 186 L128 164 Z"/>
-          <path class="ch-collar" d="M96 154 C102 162 108 165 110 165 C112 165 118 162 124 154 C120 151 115 150 110 150 C105 150 100 151 96 154 Z"/>
+          <path class="ch-top" d="M84 148 C78 158 76 178 78 203 L80 242 H140 L142 203 C144 178 142 158 136 148 Z"/>
+          <path class="ch-top" d="M84 148 C74 154 70 170 72 184 L86 182 L92 154 Z"/>
+          <path class="ch-top" d="M136 148 C146 154 150 170 148 184 L134 182 L128 154 Z"/>
+          <path class="ch-collar" d="M96 144 C102 152 108 155 110 155 C112 155 118 152 124 144 C120 141 115 140 110 140 C105 140 100 141 96 144 Z"/>
           <circle class="ch-button" cx="110" cy="192" r="2"/>
           <circle class="ch-button" cx="110" cy="214" r="2"/>
 
@@ -797,15 +830,15 @@
           <path class="ch-deco ch-deco-festival" d="M100 238 L112 238 L128 302 L116 306 Z" fill="#FFF3D6" opacity="0.9"/>
 
           <!-- 手臂 -->
-          <path class="ch-skin" d="M74 186 C70 200 68 218 68 234 L80 238 C82 218 86 200 92 190 Z"/>
-          <circle class="ch-skin" cx="74" cy="240" r="8"/>
+          <path class="ch-skin" d="M74 182 C70 196 68 214 68 230 L80 234 C82 214 86 196 92 186 Z"/>
+          <circle class="ch-skin" cx="74" cy="236" r="8"/>
           <g class="ch-arm-wave">
-            <path class="ch-skin" d="M146 186 C150 200 152 218 152 234 L140 238 C138 218 134 200 128 190 Z"/>
-            <circle class="ch-skin" cx="146" cy="240" r="8"/>
+            <path class="ch-skin" d="M146 182 C150 196 152 214 152 230 L140 234 C138 214 134 196 128 186 Z"/>
+            <circle class="ch-skin" cx="146" cy="236" r="8"/>
           </g>
 
           <!-- 脖子与头 -->
-          <rect class="ch-skin" x="100" y="120" width="20" height="32" rx="9"/>
+          <rect class="ch-skin" x="99" y="116" width="22" height="28" rx="9"/>
           <circle class="ch-skin" cx="70" cy="96" r="6"/>
           <circle class="ch-skin" cx="150" cy="96" r="6"/>
           <circle class="ch-skin" cx="110" cy="90" r="40"/>
@@ -866,9 +899,9 @@
 
     <div class="call-panel" id="call-panel">
       <div class="call-transcript" id="call-transcript" aria-live="polite"></div>
-      <div class="call-status" id="call-status">按住说话</div>
+      <div class="call-status" id="call-status">我在听…</div>
       <div class="call-buttons">
-        <button class="call-mic" id="call-mic" type="button" aria-label="按住说话">
+        <button class="call-mic" id="call-mic" type="button" aria-label="暂停或打断姐姐" title="点一下暂停 / 打断">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="3" width="6" height="11" rx="3"/>
             <path d="M5 11a7 7 0 0 0 14 0"/>
@@ -1069,7 +1102,7 @@
         <path d="M12 18v3"/>
       </svg>
     </button>
-    <div class="mic-hint">按住说话 · 姐姐说话时也可以按住打断</div>
+    <div class="mic-hint">直接说话就好 · 点麦克风暂停或打断姐姐</div>
   </div>
 
 <script type="module">
@@ -1077,7 +1110,7 @@ import { tts, COSYVOICE_VOICES } from './js/tts.js';
 import { sfx } from './js/sfx.js';
 import { asr } from './js/asr.js';
 import { replySmart, greeting, sanitize } from './js/brain.js';
-import { getParentConfig, setParentConfig } from './js/qwen.js';
+import { qwen, getParentConfig, setParentConfig } from './js/qwen.js';
 import { store } from './js/store.js';
 import { memory } from './js/memory.js';
 import { rewards, OUTFITS, SUBJECTS, PER_SUBJECT } from './js/rewards.js';
@@ -1161,13 +1194,13 @@ async function speak(text, mood = 'idle') {
       if (ch) ch.classList.remove('speaking');
       setMouth(0);
       setTimeout(() => setMood('idle'), 200);
-      if (document.body.classList.contains('in-call') && !document.body.classList.contains('recording') && !pressing) {
-        setCallStatus('按住说话');
+      if (document.body.classList.contains('in-call')) {
+        setCallStatus(voiceOn ? '我在听…' : '已暂停，点一下继续');
       }
     },
     onFallback() {
       showToast('小星姐姐嗓子有点哑，我们看她写字吧');
-      if (document.body.classList.contains('in-call')) setCallStatus('按住说话');
+      if (document.body.classList.contains('in-call')) setCallStatus(voiceOn ? '我在听…' : '已暂停，点一下继续');
     },
   });
 }
@@ -1191,6 +1224,9 @@ let pressStartAt = 0;
 let secTimer = null;   // 录音秒数
 let pressingBtn = null; // 当前按住的麦克风
 let liveLine = null;    // 通话字幕里的实时行
+let voiceOn = false;    // 免提语音会话是否开启
+let listening = false;  // 是否正在听
+let utteranceBusy = false; // 正在处理一轮话
 const liveBubble = document.getElementById('live-bubble');
 
 function startSecCounter() {
@@ -1299,9 +1335,7 @@ micBtn.addEventListener('contextmenu', e => e.preventDefault());
 
 const callMic = document.getElementById('call-mic');
 if (callMic) {
-  callMic.addEventListener('pointerdown', onPressStart);
-  callMic.addEventListener('pointerup', onPressEnd);
-  callMic.addEventListener('pointercancel', onPressEnd);
+  callMic.addEventListener('click', () => toggleVoice());
   callMic.addEventListener('contextmenu', e => e.preventDefault());
 }
 
@@ -1444,29 +1478,137 @@ function transcriptClear() {
   if (box) box.innerHTML = '';
 }
 
+function setVoiceUi(on) {
+  const mic = document.getElementById('call-mic');
+  if (mic) mic.classList.toggle('listening', !!on);
+}
+
+function setDrawVoiceStatus(text) {
+  const el = document.getElementById('draw-voice-status');
+  if (el) el.textContent = text;
+}
+
+function setDrawVoiceText(text) {
+  const el = document.getElementById('draw-voice-text');
+  if (el) el.textContent = text;
+}
+
+async function listen() {
+  if (!voiceOn || listening || utteranceBusy) return;
+  if (tts.speaking) {
+    setTimeout(() => { if (voiceOn) listen(); }, 350);
+    return;
+  }
+  listening = true;
+  setVoiceUi(true);
+  setCallStatus('我在听…');
+  setDrawVoiceStatus('姐姐在听…');
+  const ok = await asr.startLive(
+    text => {
+      const safe = sanitize(text);
+      if (!liveLine) liveLine = transcriptAdd('kid', safe);
+      else transcriptSetText(liveLine, safe);
+      if (liveLine) liveLine.classList.add('live');
+      asr.noteSpeech();
+      setDrawVoiceText('你：' + safe);
+    },
+    () => { if (listening) finishUtterance(); },
+    () => { if (listening) finishUtterance(); }
+  );
+  if (!ok) {
+    listening = false;
+    voiceOn = false;
+    setVoiceUi(false);
+    setCallStatus('麦克风打不开');
+    setDrawVoiceStatus('麦克风打不开');
+    showToast('麦克风打不开，请检查权限');
+  }
+}
+
+async function finishUtterance() {
+  if (!listening) return;
+  listening = false;
+  setVoiceUi(false);
+  setCallStatus('正在识别…');
+  const text = await asr.stopLive();
+  if (!voiceOn) return;
+  if (!text) {
+    if (liveLine) { liveLine.remove(); liveLine = null; }
+    listen();
+    return;
+  }
+  const safeText = sanitize(text);
+  if (liveLine) {
+    transcriptSetText(liveLine, safeText);
+    liveLine.classList.remove('live');
+    liveLine = null;
+  } else {
+    transcriptAdd('kid', safeText);
+  }
+  setDrawVoiceText('你：' + safeText);
+  utteranceBusy = true;
+  setCallStatus('姐姐在想…');
+  setDrawVoiceStatus('姐姐在想…');
+  const r = await replySmart(safeText);
+  if (!voiceOn) { utteranceBusy = false; return; }
+  transcriptAdd('sister', r.text);
+  setDrawVoiceText('姐姐：' + r.text);
+  await speak(r.text, r.mood);
+  utteranceBusy = false;
+  if (voiceOn) listen();
+}
+
+function toggleVoice() {
+  if (tts.speaking) {
+    tts.stop();
+    setTimeout(() => { if (voiceOn) listen(); }, 120);
+    return;
+  }
+  if (listening) {
+    listening = false;
+    asr.abortLive();
+    setVoiceUi(false);
+    setCallStatus('已暂停，点一下继续');
+    setDrawVoiceStatus('已暂停');
+    return;
+  }
+  if (!voiceOn) voiceOn = true;
+  listen();
+}
+
 function startCall() {
   if (document.body.classList.contains('in-call')) return;
   closeSheets();
   document.body.classList.add('in-call');
   transcriptClear();
-  setCallStatus('按住说话');
   tts.stop();
+  voiceOn = true;
+  listening = false;
+  utteranceBusy = false;
+  setVoiceUi(false);
+  setCallStatus('我在听…');
   if (!greeted) {
     greeted = true;
     const g = greeting();
     transcriptAdd('sister', g);
     awardDailyStar();
-    setTimeout(() => speak(g, 'happy'), 80);
+    speak(g, 'happy').then(() => { if (voiceOn) listen(); });
   } else {
     transcriptAdd('sister', '我在呢，想聊什么都可以。');
+    listen();
   }
 }
 
 function exitCall() {
+  voiceOn = false;
+  listening = false;
+  utteranceBusy = false;
   tts.stop();
+  asr.abortLive();
+  setVoiceUi(false);
   document.body.classList.remove('in-call');
   setMood('idle');
-  setCallStatus('按住说话');
+  setCallStatus('我在听…');
   renderHome();
 }
 
@@ -1476,6 +1618,7 @@ function applyOutfit() {
 }
 
 function closeSheets() {
+  stopDrawVoice();
   const open = document.querySelectorAll('.sheet.show');
   if (!open.length) return;
   open.forEach(el => el.classList.remove('show'));
@@ -1543,7 +1686,26 @@ function subjectDone(subject, tasks, done) {
   return subjectQuestions(subject, tasks).filter(t => done.has(t.id)).length;
 }
 
+function subjectQuota(subject) {
+  return (PER_SUBJECT && PER_SUBJECT[subject]) || 2;
+}
+
+const DRAW_COLORS = [
+  { name: '红色', hex: '#E4572E' },
+  { name: '橙色', hex: '#F2A541' },
+  { name: '黄色', hex: '#F4D35E' },
+  { name: '绿色', hex: '#4F8A5B' },
+  { name: '蓝色', hex: '#3D7EA6' },
+  { name: '紫色', hex: '#8E6BBF' },
+  { name: '棕色', hex: '#8A6844' },
+  { name: '黑色', hex: '#3B312A' },
+];
+let drawColor = DRAW_COLORS[0].hex;
+let drawStrokes = 0;
+let drawUsed = new Set();
+
 function renderHomework() {
+  stopDrawVoice();
   const body = document.getElementById('task-body');
   if (!body) return;
   const tasks = rewards.getDailyHomework();
@@ -1553,40 +1715,206 @@ function renderHomework() {
     body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>今天的作业都完成啦，明天再来找姐姐吧。</p></div>`;
     return;
   }
-  const incomplete = SUBJECTS.filter(s => subjectDone(s, tasks, done) < PER_SUBJECT);
+  const incomplete = SUBJECTS.filter(subject => subjectDone(subject, tasks, done) < subjectQuota(subject));
   if (!incomplete.includes(homeworkSubject)) homeworkSubject = incomplete[0];
-  const q = subjectQuestions(homeworkSubject, tasks).find(t => !done.has(t.id));
-  if (!q) {
+  let q = subjectQuestions(homeworkSubject, tasks).find(t => !done.has(t.id));
+  if (!q && incomplete.length) {
     homeworkSubject = incomplete[0];
-    renderHomework();
+    q = subjectQuestions(homeworkSubject, tasks).find(t => !done.has(t.id));
+  }
+  if (!q) {
+    body.innerHTML = `<div class="task-done"><div class="big">${rewards.getStars()} 颗星星</div><p>今天的作业都完成啦，明天再来找姐姐吧。</p></div>`;
     return;
   }
-  const tabs = SUBJECTS.map(s => {
-    const n = subjectDone(s, tasks, done);
-    return `<button class="hw-tab ${s === homeworkSubject ? 'active' : ''} ${n >= PER_SUBJECT ? 'done' : ''}" type="button" data-subject="${s}">${s} ${n}/${PER_SUBJECT}</button>`;
+  const tabs = SUBJECTS.map(subject => {
+    const n = subjectDone(subject, tasks, done);
+    const quota = subjectQuota(subject);
+    return `<button class="hw-tab ${subject === homeworkSubject ? 'active' : ''} ${n >= quota ? 'done' : ''}" type="button" data-subject="${subject}">${subject} ${n}/${quota}</button>`;
   }).join('');
-  body.innerHTML = `
+  const head = `
     <div class="hw-tabs">${tabs}</div>
     <div class="task-progress">${tasks.map(t => `<i class="task-dot ${done.has(t.id) ? 'done' : ''}"></i>`).join('')}</div>
-    <span class="task-subject">${q.subject} · 第 ${subjectDone(q.subject, tasks, done) + 1} 题</span>
+    <span class="task-subject">${q.subject} · 第 ${subjectDone(q.subject, tasks, done) + 1} 题</span>`;
+
+  const wireTabs = () => {
+    body.querySelectorAll('.hw-tab').forEach(btn => {
+      btn.onclick = () => {
+        const subject = btn.dataset.subject;
+        if (subjectDone(subject, tasks, done) >= subjectQuota(subject)) {
+          showToast(`${subject}写完啦`);
+          return;
+        }
+        homeworkSubject = subject;
+        renderHomework();
+      };
+    });
+  };
+
+  if (q.type === 'draw') {
+    body.innerHTML = `${head}
+      <div class="task-q">${q.q}</div>
+      <div class="draw-wrap">
+        <div class="draw-canvas-wrap"><canvas id="draw-canvas" width="640" height="440"></canvas></div>
+        <div class="draw-tools">
+          <div class="draw-colors" id="draw-colors"></div>
+          <button class="draw-btn ghost" id="draw-clear" type="button">清空</button>
+          <button class="draw-btn ghost" id="draw-voice-toggle" type="button">暂停</button>
+          <button class="draw-btn primary" id="draw-done" type="button">让姐姐看看</button>
+        </div>
+        <div class="draw-voice"><span id="draw-voice-status">姐姐在听…</span><div id="draw-voice-text"></div></div>
+      </div>
+      <p class="sheet-note">${q.hint || '画完让姐姐看看'}。画画时也可以直接和姐姐说话。</p>`;
+    wireTabs();
+    setupCanvas(q);
+    speak(q.q, 'thinking').then(() => {
+      if (document.getElementById('draw-canvas') && !document.body.classList.contains('in-call')) startDrawVoice();
+    });
+    return;
+  }
+
+  body.innerHTML = `${head}
     <div class="task-q">${q.q}</div>
     <div class="task-options">${q.options.map((o, i) => `<button class="task-opt" type="button" data-i="${i}">${o}</button>`).join('')}</div>
     <p class="sheet-note">答对一题得 1 颗星星，答错不扣星星。今天共 ${tasks.length} 题。</p>`;
-  body.querySelectorAll('.hw-tab').forEach(btn => {
-    btn.onclick = () => {
-      const subject = btn.dataset.subject;
-      if (subjectDone(subject, tasks, done) >= PER_SUBJECT) {
-        showToast(`${subject}写完啦`);
-        return;
-      }
-      homeworkSubject = subject;
-      renderHomework();
-    };
-  });
+  wireTabs();
   body.querySelectorAll('.task-opt').forEach(btn => {
     btn.onclick = () => answerHomework(q, Number(btn.dataset.i), btn);
   });
   speak(q.q, 'thinking');
+}
+
+function setupCanvas(q) {
+  const canvas = document.getElementById('draw-canvas');
+  const colorsEl = document.getElementById('draw-colors');
+  if (!canvas || !colorsEl) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 10;
+  drawColor = DRAW_COLORS[0].hex;
+  drawStrokes = 0;
+  drawUsed = new Set();
+
+  colorsEl.innerHTML = '';
+  DRAW_COLORS.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'draw-swatch' + (i === 0 ? ' active' : '');
+    b.style.background = c.hex;
+    b.title = c.name;
+    b.onclick = () => {
+      drawColor = c.hex;
+      colorsEl.querySelectorAll('.draw-swatch').forEach(x => x.classList.toggle('active', x === b));
+    };
+    colorsEl.appendChild(b);
+  });
+
+  let drawing = false;
+  const pos = e => {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left) * canvas.width / r.width,
+      y: (e.clientY - r.top) * canvas.height / r.height,
+    };
+  };
+  canvas.onpointerdown = e => {
+    e.preventDefault();
+    drawing = true;
+    try { canvas.setPointerCapture(e.pointerId); } catch {}
+    const p = pos(e);
+    drawUsed.add(drawColor);
+    ctx.strokeStyle = drawColor;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x + 0.1, p.y + 0.1);
+    ctx.stroke();
+  };
+  canvas.onpointermove = e => {
+    if (!drawing) return;
+    const p = pos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  };
+  const end = () => {
+    if (!drawing) return;
+    drawing = false;
+    drawStrokes++;
+  };
+  canvas.onpointerup = end;
+  canvas.onpointercancel = end;
+
+  document.getElementById('draw-clear').onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawStrokes = 0;
+    drawUsed = new Set();
+  };
+  document.getElementById('draw-done').onclick = () => submitDrawing(q, canvas);
+  document.getElementById('draw-voice-toggle').onclick = () => toggleDrawVoice();
+}
+
+function startDrawVoice() {
+  if (document.body.classList.contains('in-call') || voiceOn) return;
+  voiceOn = true;
+  listening = false;
+  utteranceBusy = false;
+  setDrawVoiceStatus('姐姐在听…');
+  const btn = document.getElementById('draw-voice-toggle');
+  if (btn) btn.textContent = '暂停';
+  listen();
+}
+
+function stopDrawVoice() {
+  if (document.body.classList.contains('in-call')) return;
+  if (!voiceOn && !listening) return;
+  voiceOn = false;
+  listening = false;
+  utteranceBusy = false;
+  tts.stop();
+  asr.abortLive();
+  setVoiceUi(false);
+  setDrawVoiceStatus('已暂停');
+  const btn = document.getElementById('draw-voice-toggle');
+  if (btn) btn.textContent = '继续';
+}
+
+function toggleDrawVoice() {
+  if (voiceOn) stopDrawVoice();
+  else startDrawVoice();
+}
+
+async function submitDrawing(q, canvas) {
+  if (!drawStrokes) {
+    showToast('先画点什么，再让姐姐看吧');
+    return;
+  }
+  const colors = [...drawUsed]
+    .map(hex => (DRAW_COLORS.find(c => c.hex === hex) || {}).name)
+    .filter(Boolean);
+  stopDrawVoice();
+  rewards.completeHomework(q.id);
+  sfx.star();
+  setStars(getStars());
+  const dataUrl = canvas.toDataURL('image/png');
+  const body = document.getElementById('task-body');
+  body.innerHTML = `<div class="draw-feedback">
+    <img src="${dataUrl}" alt="你画的画">
+    <p id="draw-feedback-text">姐姐正在看你的画…</p>
+    <button class="draw-btn primary" id="draw-next" type="button" disabled>继续</button>
+  </div>`;
+  const nextBtn = document.getElementById('draw-next');
+  nextBtn.onclick = () => renderHomework();
+  let feedback = null;
+  try {
+    feedback = await qwen.drawingFeedback({ prompt: q.q, colors, strokes: drawStrokes });
+  } catch {}
+  if (!feedback) {
+    feedback = `我看到你用了${colors.length ? colors.join('、') : '好几种颜色'}，画得好认真呀！能给姐姐讲讲你画的是什么吗？`;
+  }
+  const textEl = document.getElementById('draw-feedback-text');
+  if (textEl) textEl.textContent = feedback;
+  if (nextBtn) nextBtn.disabled = false;
+  await speak(feedback, 'happy');
 }
 
 function answerHomework(q, i, btn) {

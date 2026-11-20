@@ -16,8 +16,8 @@ export const OUTFITS = [
   { id: 'festival', name: '节日裙', cost: 10, color: '#E7B36A' },
 ];
 
-export const SUBJECTS = ['语文', '数学', '英语'];
-export const PER_SUBJECT = 2;
+export const SUBJECTS = ['语文', '数学', '英语', '画画'];
+export const PER_SUBJECT = { '语文': 2, '数学': 2, '英语': 2, '画画': 1 };
 
 // 二年级水平：语文认字/词语，数学加减与乘法口诀，英语常见词
 const HOMEWORK_BANK = {
@@ -36,6 +36,11 @@ const HOMEWORK_BANK = {
     { id: 'm4', subject: '数学', q: '24 加 6 等于几？', options: ['28', '30', '32'], answer: 1 },
     { id: 'm5', subject: '数学', q: '5 乘 2 等于几？', options: ['7', '10', '12'], answer: 1 },
     { id: 'm6', subject: '数学', q: '18 减 7 等于几？', options: ['9', '10', '11'], answer: 2 },
+  ],
+  '画画': [
+    { id: 'd1', subject: '画画', type: 'draw', q: '画一画你想象中的彩虹蘑菇吧', hint: '可以选颜色，画完让姐姐看看' },
+    { id: 'd2', subject: '画画', type: 'draw', q: '画一只你最喜欢的小动物吧', hint: '它长什么样？画给姐姐看看' },
+    { id: 'd3', subject: '画画', type: 'draw', q: '画一画今天的天空吧', hint: '今天的天是什么颜色的？' },
   ],
   '英语': [
     { id: 'e1', subject: '英语', q: '“苹果”用英语怎么说？', options: ['apple', 'banana', 'orange'], answer: 0 },
@@ -71,8 +76,9 @@ function pickDailyHomework() {
   const out = [];
   SUBJECTS.forEach((subject, si) => {
     const list = HOMEWORK_BANK[subject];
+    const quota = PER_SUBJECT[subject] || 1;
     const start = (seed + si * 3) % list.length;
-    for (let i = 0; i < PER_SUBJECT; i++) {
+    for (let i = 0; i < quota; i++) {
       out.push(list[(start + i) % list.length]);
     }
   });
