@@ -153,6 +153,34 @@ export const store = {
     }
   },
 
+  /** 孩子档案：按名字同步配置与成长数据。 */
+  async loadProfile(name) {
+    if (mode === 'sqlite') {
+      try {
+        const data = await api('/api/profile?name=' + encodeURIComponent(name));
+        if (data.profile) {
+          writeLocal('xjx_profile_' + name, data.profile);
+          return data.profile;
+        }
+        return null;
+      } catch {
+        mode = 'local';
+      }
+    }
+    return readLocal('xjx_profile_' + name, null);
+  },
+
+  async saveProfile(name, data) {
+    writeLocal('xjx_profile_' + name, data);
+    if (mode === 'sqlite') {
+      try {
+        await api('/api/profile', { method: 'PUT', body: { name, data } });
+      } catch {
+        mode = 'local';
+      }
+    }
+  },
+
   /** 父母设置页展示用：当前用的是数据库还是浏览器缓存。 */
   async status() {
     if (mode === 'sqlite') {

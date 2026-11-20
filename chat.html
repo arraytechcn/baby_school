@@ -1403,6 +1403,9 @@ const HOME_LINES = [
 let greeted = false;      // 本次打开是否已经打过招呼
 let usageMs = 0;          // 今日已在通话里停留的毫秒数
 let bubbleTimer = null;
+let profileName = 'default'; // 孩子档案名（跟着孩子名字走）
+let profileReady = false;    // 档案是否已加载，防止启动时反向上传
+let profileSyncTimer = null;
 
 function todayStamp() {
   const d = new Date();
@@ -1429,6 +1432,65 @@ function setStars(n) {
   rewards.setStars(n);
   const el = document.getElementById('home-stars');
   if (el) el.textContent = String(rewards.getStars());
+  scheduleProfileSync();
+}
+
+function applyProfile(profile) {
+  if (!profile) return;
+  try {
+    if (Object.prototype.hasOwnProperty.call(profile, 'apiKey')) {
+      if (profile.apiKey) localStorage.setItem('xjx_dashscope_key', btoa(profile.apiKey));
+      else localStorage.removeItem('xjx_dashscope_key');
+    }
+    if (profile.parentConfig) localStorage.setItem('xjx_parent_config', JSON.stringify(profile.parentConfig));
+    if (typeof profile.stars === 'number') localStorage.setItem('xjx_stars', String(profile.stars));
+    if (Array.isArray(profile.items)) localStorage.setItem('xjx_items', JSON.stringify(profile.items));
+    if (profile.look) localStorage.setItem('xjx_look', JSON.stringify(profile.look));
+    if (profile.homework) localStorage.setItem('xjx_homework', JSON.stringify(profile.homework));
+    if (profile.starDaily) localStorage.setItem('xjx_star_daily', profile.starDaily);
+    if (profile.cosyVoice) localStorage.setItem('xjx_cosy_voice', profile.cosyVoice);
+    if (profile.theme) localStorage.setItem('xjx_theme', profile.theme);
+  } catch {}
+}
+
+function buildProfile() {
+  let apiKey = '';
+  try {
+    const raw = localStorage.getItem('xjx_dashscope_key');
+    apiKey = raw ? atob(raw) : '';
+  } catch {}
+  const parse = (key, fallback) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  return {
+    childName: memory.name || '',
+    apiKey,
+    parentConfig: parse('xjx_parent_config', null),
+    stars: rewards.getStars(),
+    items: parse('xjx_items', []),
+    look: rewards.getLook(),
+    homework: parse('xjx_homework', null),
+    starDaily: localStorage.getItem('xjx_star_daily') || null,
+    cosyVoice: localStorage.getItem('xjx_cosy_voice') || null,
+    theme: localStorage.getItem('xjx_theme') || null,
+    updatedAt: Date.now(),
+  };
+}
+
+async function syncProfileNow() {
+  if (!profileReady) return;
+  try { await store.saveProfile(profileName, buildProfile()); } catch {}
+}
+
+function scheduleProfileSync() {
+  if (!profileReady) return;
+  clearTimeout(profileSyncTimer);
+  profileSyncTimer = setTimeout(() => { syncProfileNow(); }, 700);
 }
 
 function renderUsage() {
@@ -1628,6 +1690,7 @@ function toggleVoice() {
 
 function startCall() {
   if (document.body.classList.contains('in-call')) return;
+  tts.warmup();
   closeSheets();
   document.body.classList.add('in-call');
   transcriptClear();
@@ -1674,6 +1737,7 @@ function applyLook() {
     el.dataset.hair = look.hair;
     el.dataset.jewelry = look.jewelry;
   });
+  scheduleProfileSync();
 }
 
 let dressCategory = 'top';
@@ -2001,6 +2065,7 @@ function answerHomework(q, i, btn) {
 }
 
 function openHomework() {
+  tts.warmup();
   const tasks = rewards.getDailyHomework();
   const done = new Set(rewards.getHomeworkState().done);
   const next = SUBJECTS.find(subject => subjectQuestions(subject, tasks).some(t => !done.has(t.id)));
@@ -2050,6 +2115,7 @@ function initHome() {
     const next = home.dataset.theme === 'night' ? 'day' : 'night';
     try { localStorage.setItem(THEME_KEY, next); } catch {}
     applyTheme(next);
+    scheduleProfileSync();
   };
   if (character) {
     character.onclick = showHomeLine;
@@ -2067,6 +2133,8 @@ function initHome() {
     btn.addEventListener('click', closeSheets);
   });
   applyLook();
+  rewards.syncUnlocks();
+  document.addEventListener('pointerdown', () => tts.warmup(), { once: true, passive: true });
 
   // 眨眼
   let blinkTimer = setInterval(() => {
@@ -2091,6 +2159,16 @@ function initHome() {
 (async () => {
   await store.init();
   memory.hydrate(await store.loadFacts());
+  profileName = memory.name || 'default';
+  const profile = await store.loadProfile(profileName);
+  if (profile) {
+    applyProfile(profile);
+    profileReady = true;
+  } else {
+    profileReady = true;
+    await syncProfileNow();
+  }
+  applyLook();
   const past = await store.loadHistory(40);
   if (past.length) {
     for (const m of past) {
@@ -2162,6 +2240,7 @@ function renderAll() {
         ? parentCfg.values.filter(v => v !== tag)
         : [...parentCfg.values, tag];
       setParentConfig(parentCfg);
+      scheduleProfileSync();
     },
     () => {}
   );
@@ -2171,6 +2250,7 @@ function renderAll() {
     tag => {
       parentCfg.forbiddenTopics = parentCfg.forbiddenTopics.filter(v => v !== tag);
       setParentConfig(parentCfg);
+      scheduleProfileSync();
     }
   );
   document.getElementById('set-custom-value').value = parentCfg.customValue || '';
@@ -2212,6 +2292,7 @@ function renderVoices() {
       <div class="vrow"><button class="btn small" data-v="${v.id}">试听并选中</button></div>`;
     card.querySelector('button').onclick = () => {
       tts.setCosyVoice(v.id);
+      scheduleProfileSync();
       renderVoices();
       log('选中音色: ' + v.name + '（' + v.trait + '）');
       audition(SAMPLE_TEXT);
@@ -2259,12 +2340,14 @@ document.getElementById('set-age').onchange = e => {
   parentCfg.childAge = v;
   setParentConfig(parentCfg);
   renderHome();
+  scheduleProfileSync();
   log('孩子年龄: ' + v);
 };
 document.getElementById('set-grade').onchange = e => {
   parentCfg.childGrade = e.target.value;
   setParentConfig(parentCfg);
   renderHome();
+  scheduleProfileSync();
   log('孩子年级: ' + e.target.value);
 };
 
@@ -2275,18 +2358,21 @@ document.getElementById('set-key-save').onclick = () => {
   tts.setApiKey(k);
   keyInput.value = '';
   showEngine();
+  scheduleProfileSync();
   log('API Key 已保存');
 };
 document.getElementById('set-key-clear').onclick = () => {
   tts.setApiKey(null);
   keyInput.value = '';
   showEngine();
+  scheduleProfileSync();
   log('API Key 已清除');
 };
 
 document.getElementById('set-custom-value').onchange = e => {
   parentCfg.customValue = e.target.value.trim().slice(0, 20);
   setParentConfig(parentCfg);
+  scheduleProfileSync();
   log('自定义核心思想: ' + (parentCfg.customValue || '(空)'));
 };
 document.getElementById('set-custom-forbidden').onkeydown = e => {
@@ -2296,6 +2382,7 @@ document.getElementById('set-custom-forbidden').onkeydown = e => {
   if (!parentCfg.forbiddenTopics.includes(v)) {
     parentCfg.forbiddenTopics.push(v);
     setParentConfig(parentCfg);
+    scheduleProfileSync();
     log('新增禁止话题: ' + v);
   }
   e.target.value = '';

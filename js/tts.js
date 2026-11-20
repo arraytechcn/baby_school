@@ -488,6 +488,19 @@ export const tts = {
     if (v) state.voice = v;
   },
 
+  /** 在用户手势里调用一次，解锁 iOS 的 Web Audio */
+  warmup() {
+    try {
+      const ctx = ensureAudio();
+      if (ctx.state !== 'running') ctx.resume().catch(() => {});
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(streamGain);
+      src.start(0);
+    } catch {}
+  },
+
   /**
    * 朗读一段文案。有 Key 优先 CosyVoice，失败自动降级 Web Speech，再不行静默文字。
    * handlers.onDegrade(engine) 可选：发生降级时回调（'webspeech'），便于上层/调试用。

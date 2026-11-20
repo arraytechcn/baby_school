@@ -86,6 +86,11 @@ def init_db():
                 updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
                 PRIMARY KEY (kind, value)
             );
+            CREATE TABLE IF NOT EXISTS profiles (
+                name TEXT PRIMARY KEY,
+                data TEXT NOT NULL,
+                updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+            );
             """
         )
         conn.commit()
@@ -194,6 +199,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._history_get(parsed)
         if path == '/api/facts':
             return self._facts_get()
+        if path == '/api/profile':
+            return self._profile_get(parsed)
         if path in ('/ca.pem', '/ca.crt'):
             ca_path = os.path.join(DATA_DIR, 'certs', 'ca.pem')
             if os.path.isfile(ca_path):
@@ -223,8 +230,11 @@ class Handler(BaseHTTPRequestHandler):
         return self._error(404, 'not found')
 
     def do_PUT(self):
-        if urlparse(self.path).path == '/api/facts':
+        path = urlparse(self.path).path
+        if path == '/api/facts':
             return self._facts_put()
+        if path == '/api/profile':
+            return self._profile_put()
         return self._error(404, 'not found')
 
     def do_DELETE(self):
@@ -314,6 +324,49 @@ class Handler(BaseHTTPRequestHandler):
         conn = connect()
         try:
             write_facts(conn, facts)
+            conn.commit()
+        finally:
+            conn.close()
+        return self._json(200, {'ok': True})
+
+    # ---- 孩子档案（按名字同步配置/成长数据） ----
+    def _profile_get(self, parsed):
+        name = (parse_qs(parsed.query).get('name') or [''])[0].strip()[:32]
+        if not name:
+            return self._error(400, 'missing name')
+        conn = connect()
+        try:
+            row = conn.execute(
+                'SELECT data, updated_at FROM profiles WHERE name = ?', (name,)
+            ).fetchone()
+        finally:
+            conn.close()
+        if not row:
+            return self._json(200, {'profile': None})
+        try:
+            data = json.loads(row['data'])
+        except json.JSONDecodeError:
+            data = None
+        return self._json(200, {'profile': data, 'updated_at': row['updated_at']})
+
+    def _profile_put(self):
+        body = self._body()
+        if not isinstance(body, dict):
+            return self._error(400, 'bad body')
+        name = str(body.get('name') or '').strip()[:32]
+        data = body.get('data')
+        if not name or not isinstance(data, dict):
+            return self._error(400, 'bad profile')
+        raw = json.dumps(data, ensure_ascii=False)
+        if len(raw) > 200_000:
+            return self._error(413, 'profile too large')
+        conn = connect()
+        try:
+            conn.execute(
+                'INSERT INTO profiles (name, data, updated_at) VALUES (?, ?, datetime(\'now\', \'localtime\')) '
+                'ON CONFLICT(name) DO UPDATE SET data = excluded.data, updated_at = datetime(\'now\', \'localtime\')',
+                (name, raw),
+            )
             conn.commit()
         finally:
             conn.close()
