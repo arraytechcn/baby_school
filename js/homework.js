@@ -205,6 +205,9 @@ const EXTRA_ROWS = {
     { q: '如果你有一朵七色花，你想用它做什么？', options: ['帮助别人', '去看看世界', '让家人开心'], answer: -1, type: 'open', tag: '发散思考' },
     { q: '你觉得云朵像什么？', options: ['棉花糖', '小船', '小羊'], answer: -1, type: 'open', tag: '发散思考' },
     { q: '如果会飞，你最想飞到哪里？', options: ['天上', '海边', '森林'], answer: -1, type: 'open', tag: '发散思考' },
+    { q: '“春风又绿江南岸”中的“绿”是什么意思？', options: ['吹绿、使…变绿', '绿色', '绿叶'], answer: 0, tag: '五年级挑战', stars: 10 },
+    { q: '“刻舟求剑”告诉我们什么？', options: ['事物在变化，不能死守老办法', '剑掉水里要刻船', '船会动'], answer: 0, tag: '五年级挑战', stars: 10 },
+    { q: '“比喻”和“拟人”都是什么？', options: ['修辞手法', '标点符号', '句子成分'], answer: 0, tag: '五年级挑战', stars: 10 },
   ],
   '数学': [
     { q: '12 除以 3 等于几？', options: ['4', '3', '5'], answer: 0, tag: '三年级挑战' },
@@ -213,6 +216,10 @@ const EXTRA_ROWS = {
     { q: '一盒有 6 支笔，4 盒一共有几支？', options: ['24', '20', '28'], answer: 0, tag: '三年级挑战' },
     { q: '用 1、2、3 三个数字，能组成几个不同的三位数？', options: ['6', '3', '9'], answer: 0, tag: '三年级挑战' },
     { q: '生活中哪里会用到乘法？', options: ['买东西算总价', '数星星', '排队'], answer: -1, type: 'open', tag: '发散思考' },
+    { q: '1/2 + 1/4 等于几？', options: ['3/4', '2/6', '1/6'], answer: 0, tag: '五年级挑战', stars: 10 },
+    { q: '0.5 × 8 等于几？', options: ['4', '0.4', '40'], answer: 0, tag: '五年级挑战', stars: 10 },
+    { q: '一个长方形长 6 厘米、宽 4 厘米，面积是多少？', options: ['24 平方厘米', '20 平方厘米', '10 平方厘米'], answer: 0, tag: '五年级挑战', stars: 10 },
+    { q: '3x + 2 = 11，x 等于几？', options: ['3', '4', '5'], answer: 0, tag: '五年级挑战', stars: 10 },
   ],
   '英语': [
     { q: '“How are you?” 怎么回答？', options: ["I'm fine, thank you.", 'Goodbye.', 'Good night.'], answer: 0, tag: '三年级挑战' },
@@ -220,6 +227,9 @@ const EXTRA_ROWS = {
     { q: '“Monday” 是星期几？', options: ['星期一', '星期二', '星期日'], answer: 0, tag: '三年级挑战' },
     { q: '“I like apples.” 是什么意思？', options: ['我喜欢苹果', '我不喜欢苹果', '我有苹果'], answer: 0, tag: '三年级挑战' },
     { q: '如果见到外国小朋友，你想怎么打招呼？', options: ['Hello!', 'Goodbye!', 'Sorry!'], answer: -1, type: 'open', tag: '发散思考' },
+    { q: '“I have been to Beijing.” 是什么意思？', options: ['我去过北京', '我要去北京', '我在北京'], answer: 0, tag: '五年级挑战', stars: 10 },
+    { q: '“What did you do yesterday?” 是什么时态？', options: ['一般过去时', '一般现在时', '现在进行时'], answer: 0, tag: '五年级挑战', stars: 10 },
+    { q: '“beautiful” 的比较级是？', options: ['more beautiful', 'beautifuler', 'most beautiful'], answer: 0, tag: '五年级挑战', stars: 10 },
   ],
   '画画': ['你梦里的世界', '会飞的房子', '海底小学', '和姐姐一起的下午', '未来的汽车'],
 };
@@ -238,6 +248,7 @@ function buildExtras(subject, rows, prefix, start) {
       answer: isOpen ? -1 : (row.answer + shift) % 3,
       type: isOpen ? 'open' : undefined,
       tag: row.tag,
+      stars: Number(row.stars) || 1,
     };
   });
 }

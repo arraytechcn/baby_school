@@ -212,12 +212,13 @@ export const rewards = {
     const earned = Number.isFinite(Number(st.earned)) ? Number(st.earned) : Math.min(7, st.done.length);
     return { day: st.day, done: st.done, earned };
   },
-  completeHomework(id) {
+  completeHomework(id, stars = 1) {
     const st = this.getHomeworkState();
     if (!st.done.includes(id)) {
+      const gain = Math.max(1, Math.floor(Number(stars) || 1));
       st.done.push(id);
-      st.earned += 1;
-      this.addStars(1);
+      st.earned += gain;
+      this.addStars(gain);
       write(HOMEWORK_KEY, st);
     }
     return this.getHomeworkState();

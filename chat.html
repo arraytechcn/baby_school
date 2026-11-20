@@ -833,30 +833,22 @@
   [data-jewelry="jewelry-necklace"] .ch-necklace { display: block; }
   [data-jewelry="jewelry-bracelet"] .ch-bracelet { display: block; }
 
-  .ch-dress { display: none; }
-  .has-dress .ch-dress { display: block; }
+  .ch-gown { display: none; }
+  .ch-tiara { display: none; }
   .has-dress .ch-top, .has-dress .ch-collar, .has-dress .ch-button,
-  .has-dress .ch-pants, .has-dress .ch-skirt, .has-dress .ch-deco { display: none; }
-  [data-dress="gown-star"] .ch-dress-body,
-  [data-dress="gown-star"] .ch-dress-skirt { fill: #CBB7E8; }
-  [data-dress="gown-star"] .ch-dress-sash { fill: #FFF3D6; }
-  [data-dress="gown-rainbow"] .ch-dress-body,
-  [data-dress="gown-rainbow"] .ch-dress-skirt { fill: url(#dressRainbow); }
-  [data-dress="gown-rainbow"] .ch-dress-sash { fill: #FFF7E6; }
-  [data-dress="gown-moon"] .ch-dress-body,
-  [data-dress="gown-moon"] .ch-dress-skirt { fill: #9FB6D9; }
-  [data-dress="gown-moon"] .ch-dress-sash { fill: #E8EEF8; }
-  [data-dress="gown-flower"] .ch-dress-body,
-  [data-dress="gown-flower"] .ch-dress-skirt { fill: #E9A6B8; }
-  [data-dress="gown-flower"] .ch-dress-sash { fill: #FFF3D6; }
-  [data-dress="gown-dream"] .ch-dress-body,
-  [data-dress="gown-dream"] .ch-dress-skirt { fill: #F2D9A6; }
-  [data-dress="gown-dream"] .ch-dress-sash { fill: #C99A4A; }
-  .ch-dress-star, .ch-dress-flower, .ch-dress-moon { display: none; }
-  [data-dress="gown-star"] .ch-dress-star,
-  [data-dress="gown-dream"] .ch-dress-star { display: block; }
-  [data-dress="gown-moon"] .ch-dress-moon { display: block; }
-  [data-dress="gown-flower"] .ch-dress-flower { display: block; }
+  .has-dress .ch-pants, .has-dress .ch-skirt { display: none; }
+  .has-dress .ch-deco,
+  .has-dress .ch-deco-pajama,
+  .has-dress .ch-deco-sport,
+  .has-dress .ch-deco-festival { display: none !important; }
+  [data-dress="gown-star"] .gown-star,
+  [data-dress="gown-rainbow"] .gown-rainbow,
+  [data-dress="gown-moon"] .gown-moon,
+  [data-dress="gown-flower"] .gown-flower,
+  [data-dress="gown-dream"] .gown-dream { display: block; }
+  [data-dress="gown-dream"] .ch-tiara { display: block; }
+  [data-hat="hat-cap"] .ch-tiara,
+  [data-hat="hat-beret"] .ch-tiara { display: none; }
 
   .ch-deco { display: none; }
   [data-top="top-pajama"] .ch-deco-pajama { display: block; }
@@ -958,21 +950,71 @@
           <path class="ch-top" d="M84 136 C74 142 70 158 72 174 L86 172 L92 142 Z"/>
           <path class="ch-top" d="M136 136 C146 142 150 158 148 174 L134 172 L128 142 Z"/>
           <path class="ch-collar" d="M96 130 C102 138 108 141 110 141 C112 141 118 138 124 130 C120 127 115 126 110 126 C105 126 100 127 96 130 Z"/>
-          <g class="ch-dress">
-            <path class="ch-dress-body" d="M84 136 C80 152 78 172 80 196 L140 196 C142 172 140 152 136 136 Z"/>
-            <path class="ch-dress-skirt" d="M80 196 C70 222 62 262 56 302 L164 302 C158 262 150 222 140 196 Z"/>
-            <path class="ch-dress-sash" d="M80 190 L140 190 L141 202 L79 202 Z"/>
-            <g class="ch-dress-star" fill="#FFF7E6">
+          <g class="ch-gown gown-star">
+            <path fill="#CBB7E8" d="M84 136 C80 152 78 172 80 196 L140 196 C142 172 140 152 136 136 Z"/>
+            <path fill="#CBB7E8" d="M80 196 C70 222 62 262 56 302 L164 302 C158 262 150 222 140 196 Z"/>
+            <path fill="#E8D9F6" d="M84 136 C74 138 68 148 70 158 C78 160 86 156 90 148 Z"/>
+            <path fill="#E8D9F6" d="M136 136 C146 138 152 148 150 158 C142 160 134 156 130 148 Z"/>
+            <path fill="#FFF3D6" d="M80 190 L140 190 L141 202 L79 202 Z"/>
+            <g fill="#FFF7E6">
               <circle cx="92" cy="240" r="2"/><circle cx="132" cy="252" r="2"/>
               <circle cx="78" cy="270" r="2"/><circle cx="118" cy="280" r="2"/>
               <circle cx="146" cy="292" r="2"/><circle cx="100" cy="296" r="2"/>
             </g>
-            <g class="ch-dress-flower" fill="#FFF3D6">
+          </g>
+          <g class="ch-gown gown-rainbow">
+            <path fill="#F3B7C6" d="M84 136 C80 152 78 172 80 196 L140 196 C142 172 140 152 136 136 Z"/>
+            <path fill="#D8C4F0" d="M80 196 C72 214 66 234 62 252 L158 252 C154 234 148 214 140 196 Z"/>
+            <path fill="#B9E3F0" d="M62 244 C56 262 52 280 48 296 L172 296 C168 280 164 262 158 244 Z"/>
+            <path fill="#FFD1DC" d="M48 288 C44 296 42 302 42 308 L178 308 C178 302 176 296 172 288 Z"/>
+            <path fill="#FFF7E6" d="M80 190 L140 190 L141 202 L79 202 Z"/>
+            <path fill="#E8D9F6" d="M84 136 C74 138 68 148 70 158 C78 160 86 156 90 148 Z"/>
+            <path fill="#E8D9F6" d="M136 136 C146 138 152 148 150 158 C142 160 134 156 130 148 Z"/>
+            <g fill="#FFF7E6">
+              <circle cx="80" cy="230" r="2"/><circle cx="134" cy="238" r="2"/>
+              <circle cx="66" cy="270" r="2"/><circle cx="152" cy="278" r="2"/>
+              <circle cx="96" cy="296" r="2"/><circle cx="122" cy="300" r="2"/>
+            </g>
+          </g>
+          <g class="ch-gown gown-moon">
+            <path fill="#C9D6F2" opacity="0.72" d="M84 150 C62 190 50 250 52 296 C64 272 74 232 82 198 Z"/>
+            <path fill="#C9D6F2" opacity="0.72" d="M136 150 C158 190 170 250 168 296 C156 272 146 232 138 198 Z"/>
+            <path fill="#9FB6D9" d="M84 136 C80 150 78 168 80 188 L140 188 C142 168 140 150 136 136 Z"/>
+            <path fill="#9FB6D9" d="M80 188 C74 222 66 266 60 306 L160 306 C154 266 146 222 140 188 Z"/>
+            <path fill="#E8EEF8" d="M80 184 L140 184 L141 194 L79 194 Z"/>
+            <path fill="#FFF3D6" d="M118 248 a10 10 0 1 0 9 12 a8 8 0 0 1 -9 -12 z"/>
+            <g fill="#FFF7E6">
+              <circle cx="92" cy="230" r="1.8"/><circle cx="130" cy="242" r="1.8"/>
+              <circle cx="76" cy="264" r="1.8"/><circle cx="112" cy="286" r="1.8"/>
+              <circle cx="146" cy="292" r="1.8"/>
+            </g>
+          </g>
+          <g class="ch-gown gown-flower">
+            <path fill="#E9A6B8" d="M84 136 C80 152 78 172 80 196 L140 196 C142 172 140 152 136 136 Z"/>
+            <path fill="#E9A6B8" d="M80 196 C70 222 62 262 56 302 L164 302 C158 262 150 222 140 196 Z"/>
+            <path fill="#E9A6B8" d="M88 136 L94 158 L100 158 L94 136 Z"/>
+            <path fill="#E9A6B8" d="M132 136 L126 158 L120 158 L126 136 Z"/>
+            <path fill="#FFF3D6" opacity="0.94" d="M92 196 L128 196 L136 286 L84 286 Z"/>
+            <path fill="#FFF3D6" d="M80 190 L140 190 L141 202 L79 202 Z"/>
+            <g fill="#FFF7E6">
               <circle cx="92" cy="246" r="3"/><circle cx="88" cy="250" r="3"/><circle cx="96" cy="250" r="3"/><circle cx="92" cy="254" r="3"/>
               <circle cx="124" cy="266" r="3"/><circle cx="120" cy="270" r="3"/><circle cx="128" cy="270" r="3"/><circle cx="124" cy="274" r="3"/>
               <circle cx="104" cy="288" r="3"/><circle cx="100" cy="292" r="3"/><circle cx="108" cy="292" r="3"/><circle cx="104" cy="296" r="3"/>
             </g>
-            <path class="ch-dress-moon" d="M118 248 a10 10 0 1 0 9 12 a8 8 0 0 1 -9 -12 z" fill="#FFF3D6"/>
+          </g>
+          <g class="ch-gown gown-dream">
+            <path fill="#F2D9A6" d="M84 136 C80 152 78 172 80 196 L140 196 C142 172 140 152 136 136 Z"/>
+            <path fill="#F2D9A6" d="M80 196 C64 220 50 262 42 306 L178 306 C170 262 156 220 140 196 Z"/>
+            <path fill="#FFF3D6" opacity="0.55" d="M52 250 C48 258 44 266 42 274 L178 274 C176 266 172 258 168 250 Z"/>
+            <path fill="#FFF3D6" d="M42 296 C40 302 38 306 38 310 L182 310 C182 306 180 302 178 296 Z"/>
+            <path fill="#C99A4A" d="M80 190 L140 190 L141 202 L79 202 Z"/>
+            <path fill="#FFF3D6" d="M84 136 C74 138 68 148 70 158 C78 160 86 156 90 148 Z"/>
+            <path fill="#FFF3D6" d="M136 136 C146 138 152 148 150 158 C142 160 134 156 130 148 Z"/>
+            <g fill="#FFF7E6">
+              <circle cx="84" cy="236" r="2"/><circle cx="136" cy="248" r="2"/>
+              <circle cx="66" cy="270" r="2"/><circle cx="154" cy="280" r="2"/>
+              <circle cx="98" cy="292" r="2"/><circle cx="122" cy="298" r="2"/>
+            </g>
           </g>
           <g class="ch-necklace">
             <path d="M99 152 C104 162 116 162 121 152" fill="none" stroke="#E7B36A" stroke-width="1.6" stroke-linecap="round"/>
@@ -1031,6 +1073,9 @@
           </g>
           <g class="ch-hair-star">
             <path d="M72 56 l2.6 6 6.4 .5 -4.9 4.2 1.5 6.3 -5.6-3.4 -5.6 3.4 1.5-6.3 -4.9-4.2 6.4-.5z" fill="#F4D35E" stroke="#E0B93F" stroke-width="1"/>
+          </g>
+          <g class="ch-tiara">
+            <path d="M94 58 L100 50 L106 58 L112 48 L118 58 L124 52 L122 64 L96 64 Z" fill="#F4D35E" stroke="#E0B93F" stroke-width="1"/>
           </g>
 
           <!-- 帽子 -->
@@ -2077,7 +2122,7 @@ function renderHomework() {
   const head = `
     <div class="hw-tabs">${tabs}</div>
     <div class="task-progress">${tasks.map(t => `<i class="task-dot ${done.has(t.id) ? 'done' : ''}"></i>`).join('')}</div>
-    <span class="task-subject">${q.subject} · 第 ${subjectDone(q.subject, tasks, done) + 1} 题${q.tag ? ` · ${q.tag}` : ''}</span>`;
+    <span class="task-subject">${q.subject} · 第 ${subjectDone(q.subject, tasks, done) + 1} 题${q.tag ? ` · ${q.tag}` : ''}${Number(q.stars) > 1 ? ` · ${q.stars} 星` : ''}</span>`;
 
   const wireTabs = () => {
     body.querySelectorAll('.hw-tab').forEach(btn => {
@@ -2118,7 +2163,7 @@ function renderHomework() {
   body.innerHTML = `${head}
     <div class="task-q">${q.q}</div>
     <div class="task-options">${q.options.map((o, i) => `<button class="task-opt" type="button" data-i="${i}">${o}</button>`).join('')}</div>
-    <p class="sheet-note">${q.type === 'open' ? '这道题没有标准答案，选一个你最想的，说说你的想法。' : `答对一题得 1 颗星星，答错不扣星星。这一套共 ${tasks.length} 题。`}</p>`;
+    <p class="sheet-note">${q.type === 'open' ? '这道题没有标准答案，选一个你最想的，说说你的想法。' : Number(q.stars) > 1 ? `这是超纲挑战题，答对得 ${q.stars} 颗星星，答错不扣星。` : `答对一题得 1 颗星星，答错不扣星星。这一套共 ${tasks.length} 题。`}</p>`;
   wireTabs();
   body.querySelectorAll('.task-opt').forEach(btn => {
     btn.onclick = () => answerHomework(q, Number(btn.dataset.i), btn);
@@ -2262,11 +2307,12 @@ async function submitDrawing(q, canvas) {
 
 function answerHomework(q, i, btn) {
   const isOpen = q.type === 'open';
+  const gain = Math.max(1, Number(q.stars) || 1);
   if (isOpen || i === q.answer) {
-    rewards.completeHomework(q.id);
+    rewards.completeHomework(q.id, gain);
     sfx.star();
     setStars(getStars());
-    showToast(isOpen ? '这个想法真有意思，得到一颗星星' : '答对啦，得到一颗星星');
+    showToast(isOpen ? '这个想法真有意思，得到一颗星星' : `答对啦，得到 ${gain} 颗星星`);
     if (isOpen) speak('这个想法真有意思，姐姐喜欢听你说。', 'happy');
     renderHomework();
   } else {
