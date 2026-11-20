@@ -53,8 +53,11 @@ function extractFacts(text) {
   const found = [];
   let m;
   if ((m = text.match(/我叫([一-龥a-zA-Z]{1,4})/))) {
-    memory.setName(m[1]);
-    found.push({ type: 'name', value: m[1] });
+    if (!memory.name) {
+      // 名字一旦确定就不再让语音识别改掉，避免把“朱炘榆”听成别的名字
+      memory.setName(m[1]);
+      found.push({ type: 'name', value: m[1] });
+    }
   }
   if ((m = text.match(/我喜欢(吃|玩|看|画)?([一-龥a-zA-Z]{1,6})/))) {
     memory.addLike(m[2]);

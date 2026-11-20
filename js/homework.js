@@ -196,11 +196,68 @@ function buildDrawing() {
   }));
 }
 
+const EXTRA_ROWS = {
+  '语文': [
+    { q: '“床前明月光”的下一句是？', options: ['疑是地上霜', '低头思故乡', '举头望明月'], answer: 0, tag: '三年级挑战' },
+    { q: '“亡羊补牢”告诉我们什么？', options: ['出了问题及时补救', '羊跑了不用管', '把羊圈拆掉'], answer: 0, tag: '三年级挑战' },
+    { q: '“守株待兔”里的那个人为什么没等到兔子？', options: ['不努力只靠运气', '兔子搬家了', '树被砍了'], answer: 0, tag: '三年级挑战' },
+    { q: '“春眠不觉晓”的下一句是？', options: ['处处闻啼鸟', '花落知多少', '夜来风雨声'], answer: 0, tag: '三年级挑战' },
+    { q: '如果你有一朵七色花，你想用它做什么？', options: ['帮助别人', '去看看世界', '让家人开心'], answer: -1, type: 'open', tag: '发散思考' },
+    { q: '你觉得云朵像什么？', options: ['棉花糖', '小船', '小羊'], answer: -1, type: 'open', tag: '发散思考' },
+    { q: '如果会飞，你最想飞到哪里？', options: ['天上', '海边', '森林'], answer: -1, type: 'open', tag: '发散思考' },
+  ],
+  '数学': [
+    { q: '12 除以 3 等于几？', options: ['4', '3', '5'], answer: 0, tag: '三年级挑战' },
+    { q: '100 减 37 等于几？', options: ['63', '73', '67'], answer: 0, tag: '三年级挑战' },
+    { q: '25 加 38 等于几？', options: ['63', '53', '62'], answer: 0, tag: '三年级挑战' },
+    { q: '一盒有 6 支笔，4 盒一共有几支？', options: ['24', '20', '28'], answer: 0, tag: '三年级挑战' },
+    { q: '用 1、2、3 三个数字，能组成几个不同的三位数？', options: ['6', '3', '9'], answer: 0, tag: '三年级挑战' },
+    { q: '生活中哪里会用到乘法？', options: ['买东西算总价', '数星星', '排队'], answer: -1, type: 'open', tag: '发散思考' },
+  ],
+  '英语': [
+    { q: '“How are you?” 怎么回答？', options: ["I'm fine, thank you.", 'Goodbye.', 'Good night.'], answer: 0, tag: '三年级挑战' },
+    { q: "“What's your name?” 怎么回答？", options: ['My name is...', 'I am seven.', 'It is red.'], answer: 0, tag: '三年级挑战' },
+    { q: '“Monday” 是星期几？', options: ['星期一', '星期二', '星期日'], answer: 0, tag: '三年级挑战' },
+    { q: '“I like apples.” 是什么意思？', options: ['我喜欢苹果', '我不喜欢苹果', '我有苹果'], answer: 0, tag: '三年级挑战' },
+    { q: '如果见到外国小朋友，你想怎么打招呼？', options: ['Hello!', 'Goodbye!', 'Sorry!'], answer: -1, type: 'open', tag: '发散思考' },
+  ],
+  '画画': ['你梦里的世界', '会飞的房子', '海底小学', '和姐姐一起的下午', '未来的汽车'],
+};
+
+function buildExtras(subject, rows, prefix, start) {
+  return rows.map((row, i) => {
+    const isOpen = row.type === 'open' || row.answer === -1;
+    const shift = isOpen ? 0 : i % 3;
+    const options = [...row.options];
+    for (let k = 0; k < shift; k++) options.unshift(options.pop());
+    return {
+      id: prefix + (start + i),
+      subject,
+      q: row.q,
+      options,
+      answer: isOpen ? -1 : (row.answer + shift) % 3,
+      type: isOpen ? 'open' : undefined,
+      tag: row.tag,
+    };
+  });
+}
+
+function buildExtraDrawing() {
+  return EXTRA_ROWS['画画'].map((subject, i) => ({
+    id: 'd' + (51 + i),
+    subject: '画画',
+    type: 'draw',
+    q: `画一画${subject}吧`,
+    hint: '可以选颜色，画完让姐姐看看',
+    tag: '发散思考',
+  }));
+}
+
 export const HOMEWORK_BANK = {
-  '语文': buildChinese(),
-  '数学': buildMath(),
-  '英语': buildEnglish(),
-  '画画': buildDrawing(),
+  '语文': [...buildChinese(), ...buildExtras('语文', EXTRA_ROWS['语文'], 'cn', 51)],
+  '数学': [...buildMath(), ...buildExtras('数学', EXTRA_ROWS['数学'], 'm', 51)],
+  '英语': [...buildEnglish(), ...buildExtras('英语', EXTRA_ROWS['英语'], 'e', 51)],
+  '画画': [...buildDrawing(), ...buildExtraDrawing()],
 };
 
 function shuffled(list) {

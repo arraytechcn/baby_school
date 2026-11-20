@@ -293,6 +293,79 @@
     background: linear-gradient(180deg, #242D40 0%, #2E3952 55%, #3A4664 100%);
     color: #F3E7D8;
   }
+  #home[data-phase="dawn"] { background: linear-gradient(180deg, #FFF3EC 0%, #FBE4D8 58%, #F6D2C2 100%); }
+  #home[data-phase="dawn"] .scene-window { background: linear-gradient(180deg, #FFD3B8 0%, #FFF0E4 100%); border-color: #FFF7EE; }
+  #home[data-phase="dawn"] .win-sun { top: 34%; right: 18%; background: #FFB07C; box-shadow: 0 0 0 10px rgba(255, 176, 124, 0.18); }
+  #home[data-phase="morning"] .scene-window { background: linear-gradient(180deg, #BFE4F7 0%, #E9F6FF 100%); }
+  #home[data-phase="noon"] { background: linear-gradient(180deg, #FFFDF2 0%, #FFF7E4 58%, #FCEBCF 100%); }
+  #home[data-phase="noon"] .scene-window { background: linear-gradient(180deg, #D6F1FF 0%, #F4FCFF 100%); }
+  #home[data-phase="noon"] .win-sun { top: 5%; right: 27%; width: 50px; height: 50px; background: #FFE08A; box-shadow: 0 0 0 12px rgba(255, 224, 138, 0.2); }
+  #home[data-phase="afternoon"] { background: linear-gradient(180deg, #FFF6EA 0%, #FDEBD6 58%, #F8DCC0 100%); }
+  #home[data-phase="afternoon"] .scene-window { background: linear-gradient(180deg, #FFE3B8 0%, #FFF4DF 100%); }
+  #home[data-phase="afternoon"] .win-sun { top: 18%; right: 9%; background: #FFC97E; box-shadow: 0 0 0 10px rgba(255, 201, 126, 0.2); }
+  #home[data-phase="dusk"] { background: linear-gradient(180deg, #FFF0E8 0%, #F8DCD2 58%, #EFC7C6 100%); }
+  #home[data-phase="dusk"] .scene-window { background: linear-gradient(180deg, #FFB98E 0%, #FFE0C4 100%); border-color: #FFF2E6; }
+  #home[data-phase="dusk"] .win-sun { top: 38%; right: 7%; background: #FF8E5E; box-shadow: 0 0 0 12px rgba(255, 142, 94, 0.2); }
+  #home[data-phase="dusk"] .scene-stars { opacity: 0.3; }
+  #home[data-phase="evening"] { background: linear-gradient(180deg, #2B2444 0%, #3A3155 55%, #4A3A5A 100%); }
+  #home[data-phase="evening"] .scene-window { background: linear-gradient(180deg, #262E4A 0%, #3A3155 100%); }
+  #home[data-phase="evening"] .win-moon { box-shadow: -10px 4px 0 0 #262E4A; }
+  #home[data-phase="night"] .scene-window { background: linear-gradient(180deg, #1D2740 0%, #2B3A5A 100%); }
+  #home[data-phase="night"] .win-moon { box-shadow: -10px 4px 0 0 #1D2740; }
+  #home[data-phase="midnight"] { background: linear-gradient(180deg, #141A2E 0%, #1C2438 55%, #252F48 100%); }
+  #home[data-phase="midnight"] .scene-window { background: linear-gradient(180deg, #101626 0%, #1B2438 100%); border-color: #35405C; }
+  #home[data-phase="midnight"] .win-moon { box-shadow: -10px 4px 0 0 #101626; }
+
+  .home-top { position: relative; }
+  .top-clock {
+    position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11.5px; letter-spacing: 0.02em; color: #a08b80;
+    pointer-events: none;
+  }
+  #home[data-theme="night"] .top-clock { color: #B7A9B8; }
+  .clock-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #F5B75B; box-shadow: 0 0 0 3px rgba(245, 183, 91, 0.18);
+  }
+  #home[data-phase="dawn"] .clock-dot { background: #FFB07C; box-shadow: 0 0 0 3px rgba(255, 176, 124, 0.2); }
+  #home[data-phase="noon"] .clock-dot { background: #FFE08A; box-shadow: 0 0 0 3px rgba(255, 224, 138, 0.22); }
+  #home[data-phase="afternoon"] .clock-dot { background: #FFC97E; box-shadow: 0 0 0 3px rgba(255, 201, 126, 0.2); }
+  #home[data-phase="dusk"] .clock-dot { background: #FF8E5E; box-shadow: 0 0 0 3px rgba(255, 142, 94, 0.2); }
+  #home[data-phase="evening"] .clock-dot,
+  #home[data-phase="night"] .clock-dot,
+  #home[data-phase="midnight"] .clock-dot { background: #C9D6F2; box-shadow: 0 0 0 3px rgba(201, 214, 242, 0.15); }
+  #home-theme { display: none; }
+
+  .bedtime-note {
+    margin: 6px 22px 0; font-size: 12px; color: #A8471F;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .bedtime-note::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #FF8E5E; }
+  .bedtime-note[hidden] { display: none; }
+  #home[data-theme="night"] .bedtime-note { color: #F0C9A8; }
+
+  .sleep-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px;
+    background: linear-gradient(180deg, #141A2E 0%, #232C46 60%, #2E3952 100%);
+    color: #F3E7D8; text-align: center;
+  }
+  .sleep-overlay[hidden] { display: none; }
+  .sleep-card { max-width: 340px; }
+  .sleep-moon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #F6EBCF; box-shadow: -16px 8px 0 0 #141A2E;
+    margin: 0 auto 24px;
+  }
+  .sleep-card h2 { font-size: 24px; margin: 0 0 12px; font-weight: 600; }
+  .sleep-card p { font-size: 15px; line-height: 1.8; color: #C9C0D2; margin: 0 0 6px; }
+  .sleep-time { font-size: 12.5px; color: #8F87A0; margin-top: 10px; }
+  .sleep-parent {
+    margin-top: 22px; background: none; border: none; color: #8F87A0;
+    font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer;
+  }
   body.chat-view #home { display: none; }
   body:not(.chat-view) #header,
   body:not(.chat-view) #history,
@@ -305,7 +378,7 @@
   body.dressing #character { visibility: hidden; }
   body:not(.in-call) #call-panel { display: none; }
 
-  .home-top { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px 0; }
+  .home-top { display: flex; align-items: flex-start; gap: 12px; padding: 26px 20px 0; }
   .home-hello { font-size: 22px; font-weight: 600; line-height: 1.3; }
   .home-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #a08b80; padding: 2px 20px 0; }
   .home-profile { color: #A8471F; font-weight: 600; }
@@ -630,6 +703,7 @@
     font-size: 15px; line-height: 1; cursor: pointer;
   }
   .sheet-note { font-size: 12.5px; color: #a08b80; margin: 10px 0 0; }
+  .dress-balance { margin: 0 0 4px; font-size: 12.5px; color: #a08b80; }
   .dress-preview {
     height: 240px; display: flex; align-items: flex-end; justify-content: center;
     margin: 0 0 8px;
@@ -759,6 +833,31 @@
   [data-jewelry="jewelry-necklace"] .ch-necklace { display: block; }
   [data-jewelry="jewelry-bracelet"] .ch-bracelet { display: block; }
 
+  .ch-dress { display: none; }
+  .has-dress .ch-dress { display: block; }
+  .has-dress .ch-top, .has-dress .ch-collar, .has-dress .ch-button,
+  .has-dress .ch-pants, .has-dress .ch-skirt, .has-dress .ch-deco { display: none; }
+  [data-dress="gown-star"] .ch-dress-body,
+  [data-dress="gown-star"] .ch-dress-skirt { fill: #CBB7E8; }
+  [data-dress="gown-star"] .ch-dress-sash { fill: #FFF3D6; }
+  [data-dress="gown-rainbow"] .ch-dress-body,
+  [data-dress="gown-rainbow"] .ch-dress-skirt { fill: url(#dressRainbow); }
+  [data-dress="gown-rainbow"] .ch-dress-sash { fill: #FFF7E6; }
+  [data-dress="gown-moon"] .ch-dress-body,
+  [data-dress="gown-moon"] .ch-dress-skirt { fill: #9FB6D9; }
+  [data-dress="gown-moon"] .ch-dress-sash { fill: #E8EEF8; }
+  [data-dress="gown-flower"] .ch-dress-body,
+  [data-dress="gown-flower"] .ch-dress-skirt { fill: #E9A6B8; }
+  [data-dress="gown-flower"] .ch-dress-sash { fill: #FFF3D6; }
+  [data-dress="gown-dream"] .ch-dress-body,
+  [data-dress="gown-dream"] .ch-dress-skirt { fill: #F2D9A6; }
+  [data-dress="gown-dream"] .ch-dress-sash { fill: #C99A4A; }
+  .ch-dress-star, .ch-dress-flower, .ch-dress-moon { display: none; }
+  [data-dress="gown-star"] .ch-dress-star,
+  [data-dress="gown-dream"] .ch-dress-star { display: block; }
+  [data-dress="gown-moon"] .ch-dress-moon { display: block; }
+  [data-dress="gown-flower"] .ch-dress-flower { display: block; }
+
   .ch-deco { display: none; }
   [data-top="top-pajama"] .ch-deco-pajama { display: block; }
   [data-top="top-tee"] .ch-deco-sport { display: block; }
@@ -773,6 +872,7 @@
   <!-- 首页：角色 + 场景 + 四个入口 -->
   <div id="home" data-theme="day">
     <header class="home-top">
+      <div class="top-clock" id="top-clock"><i class="clock-dot" id="clock-dot"></i><span id="clock-time">--:--</span></div>
       <div>
         <div class="home-hello" id="home-hello">晚上好</div>
       </div>
@@ -807,6 +907,7 @@
       <div class="usage-track"><i class="usage-fill" id="usage-fill"></i></div>
       <span class="usage-text" id="usage-text">今日 0 / 30 分钟</span>
     </div>
+    <div class="bedtime-note" id="bedtime-note" hidden>快 21:40 了，收拾一下准备睡觉啦</div>
 
     <div class="scene">
       <div class="scene-window">
@@ -823,6 +924,13 @@
       data-hat="hat-none" data-hair="hair-none" data-jewelry="jewelry-none"
       role="button" tabindex="0" aria-label="和小星姐姐打招呼">
         <svg viewBox="0 0 220 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="dressRainbow" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#FFD1DC"/>
+              <stop offset="0.5" stop-color="#D8C4F0"/>
+              <stop offset="1" stop-color="#B9E3F0"/>
+            </linearGradient>
+          </defs>
           <ellipse class="ch-shadow" cx="110" cy="368" rx="62" ry="8"/>
 
           <!-- 后发 -->
@@ -846,10 +954,26 @@
           <path class="ch-skirt" d="M82 236 L138 236 L158 300 C158 310 150 316 140 316 H80 C70 316 62 310 62 300 Z"/>
 
           <!-- 上衣与袖子 -->
-          <path class="ch-top" d="M84 148 C78 158 76 178 78 203 L80 242 H140 L142 203 C144 178 142 158 136 148 Z"/>
-          <path class="ch-top" d="M84 148 C74 154 70 170 72 184 L86 182 L92 154 Z"/>
-          <path class="ch-top" d="M136 148 C146 154 150 170 148 184 L134 182 L128 154 Z"/>
-          <path class="ch-collar" d="M96 144 C102 152 108 155 110 155 C112 155 118 152 124 144 C120 141 115 140 110 140 C105 140 100 141 96 144 Z"/>
+          <path class="ch-top" d="M84 136 C78 146 76 168 78 198 L80 242 H140 L142 198 C144 168 142 146 136 136 Z"/>
+          <path class="ch-top" d="M84 136 C74 142 70 158 72 174 L86 172 L92 142 Z"/>
+          <path class="ch-top" d="M136 136 C146 142 150 158 148 174 L134 172 L128 142 Z"/>
+          <path class="ch-collar" d="M96 130 C102 138 108 141 110 141 C112 141 118 138 124 130 C120 127 115 126 110 126 C105 126 100 127 96 130 Z"/>
+          <g class="ch-dress">
+            <path class="ch-dress-body" d="M84 136 C80 152 78 172 80 196 L140 196 C142 172 140 152 136 136 Z"/>
+            <path class="ch-dress-skirt" d="M80 196 C70 222 62 262 56 302 L164 302 C158 262 150 222 140 196 Z"/>
+            <path class="ch-dress-sash" d="M80 190 L140 190 L141 202 L79 202 Z"/>
+            <g class="ch-dress-star" fill="#FFF7E6">
+              <circle cx="92" cy="240" r="2"/><circle cx="132" cy="252" r="2"/>
+              <circle cx="78" cy="270" r="2"/><circle cx="118" cy="280" r="2"/>
+              <circle cx="146" cy="292" r="2"/><circle cx="100" cy="296" r="2"/>
+            </g>
+            <g class="ch-dress-flower" fill="#FFF3D6">
+              <circle cx="92" cy="246" r="3"/><circle cx="88" cy="250" r="3"/><circle cx="96" cy="250" r="3"/><circle cx="92" cy="254" r="3"/>
+              <circle cx="124" cy="266" r="3"/><circle cx="120" cy="270" r="3"/><circle cx="128" cy="270" r="3"/><circle cx="124" cy="274" r="3"/>
+              <circle cx="104" cy="288" r="3"/><circle cx="100" cy="292" r="3"/><circle cx="108" cy="292" r="3"/><circle cx="104" cy="296" r="3"/>
+            </g>
+            <path class="ch-dress-moon" d="M118 248 a10 10 0 1 0 9 12 a8 8 0 0 1 -9 -12 z" fill="#FFF3D6"/>
+          </g>
           <g class="ch-necklace">
             <path d="M99 152 C104 162 116 162 121 152" fill="none" stroke="#E7B36A" stroke-width="1.6" stroke-linecap="round"/>
             <circle cx="110" cy="161" r="2.4" fill="#E7B36A"/>
@@ -867,18 +991,18 @@
           <path class="ch-deco ch-deco-festival" d="M100 238 L112 238 L128 302 L116 306 Z" fill="#FFF3D6" opacity="0.9"/>
 
           <!-- 手臂 -->
-          <path class="ch-skin" d="M74 182 C70 196 68 214 68 230 L80 234 C82 214 86 196 92 186 Z"/>
-          <circle class="ch-skin" cx="74" cy="236" r="8"/>
+          <path class="ch-skin" d="M74 174 C70 188 68 208 68 226 L80 230 C82 210 86 192 92 184 Z"/>
+          <circle class="ch-skin" cx="74" cy="232" r="8"/>
           <g class="ch-arm-wave">
-            <path class="ch-skin" d="M146 182 C150 196 152 214 152 230 L140 234 C138 214 134 196 128 186 Z"/>
-            <circle class="ch-skin" cx="146" cy="236" r="8"/>
+            <path class="ch-skin" d="M146 174 C150 188 152 208 152 226 L140 230 C138 210 134 192 128 184 Z"/>
+            <circle class="ch-skin" cx="146" cy="232" r="8"/>
           </g>
           <g class="ch-bracelet">
-            <ellipse cx="74" cy="224" rx="6" ry="2.4" fill="none" stroke="#B04A28" stroke-width="2"/>
+            <ellipse cx="74" cy="220" rx="6" ry="2.4" fill="none" stroke="#B04A28" stroke-width="2"/>
           </g>
 
           <!-- 脖子与头 -->
-          <rect class="ch-skin" x="99" y="116" width="22" height="28" rx="9"/>
+          <rect class="ch-skin" x="99" y="112" width="22" height="18" rx="8"/>
           <circle class="ch-skin" cx="70" cy="96" r="6"/>
           <circle class="ch-skin" cx="150" cy="96" r="6"/>
           <circle class="ch-skin" cx="110" cy="90" r="40"/>
@@ -1076,6 +1200,7 @@
   <div class="sheet" id="dress-sheet" aria-hidden="true">
     <div class="sheet-card">
       <div class="sheet-head"><h3>换装</h3><button class="sheet-close" type="button" data-close="dress-sheet" aria-label="关闭">✕</button></div>
+      <p class="dress-balance" id="dress-balance"></p>
       <div class="dress-preview" id="dress-preview"></div>
       <div class="dress-cats" id="dress-cats"></div>
       <div class="dress-items" id="dress-items"></div>
@@ -1513,6 +1638,73 @@ function applyTheme(theme) {
   if (home) home.dataset.theme = theme;
 }
 
+function timePhase(date = new Date()) {
+  const h = date.getHours();
+  if (h >= 5 && h < 8) return 'dawn';
+  if (h >= 8 && h < 11) return 'morning';
+  if (h >= 11 && h < 13) return 'noon';
+  if (h >= 13 && h < 17) return 'afternoon';
+  if (h >= 17 && h < 19) return 'dusk';
+  if (h >= 19 && h < 21) return 'evening';
+  if (h >= 21 && h < 24) return 'night';
+  return 'midnight';
+}
+
+let bedtimeWarned = false;
+
+function checkBedtime(now = new Date()) {
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  const warn = 21 * 60 + 30;
+  const lock = 21 * 60 + 40;
+  const wake = 6 * 60 + 30;
+  let override = 0;
+  try { override = Number(sessionStorage.getItem('xjx_sleep_override')) || 0; } catch {}
+  const locked = (minutes >= lock || minutes < wake) && Date.now() > override;
+  const overlay = document.getElementById('sleep-overlay');
+  if (overlay) overlay.hidden = !locked;
+  const note = document.getElementById('bedtime-note');
+  if (note) note.hidden = !(minutes >= warn && minutes < lock && !locked);
+  if (locked) {
+    const title = document.getElementById('sleep-title');
+    if (title) title.textContent = `该睡觉啦${memory.name ? '，' + memory.name : ''}`;
+    const t = document.getElementById('sleep-time');
+    if (t) t.textContent = `现在 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+  if (!locked && minutes >= warn && minutes < lock && !bedtimeWarned) {
+    bedtimeWarned = true;
+    showToast('21:30 啦，还有 10 分钟就要睡觉啦');
+  }
+  if (minutes < warn || minutes >= lock) bedtimeWarned = false;
+}
+
+function applyTime() {
+  const now = new Date();
+  const phase = timePhase(now);
+  const home = document.getElementById('home');
+  if (home) {
+    home.dataset.phase = phase;
+    home.dataset.theme = ['evening', 'night', 'midnight'].includes(phase) ? 'night' : 'day';
+  }
+  const clock = document.getElementById('clock-time');
+  if (clock) {
+    clock.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+  checkBedtime(now);
+}
+
+function bindSleep() {
+  const btn = document.getElementById('sleep-parent');
+  if (!btn) return;
+  btn.onclick = () => {
+    const code = window.prompt('请输入家长密码');
+    if (code !== '666') return;
+    try { sessionStorage.setItem('xjx_sleep_override', String(Date.now() + 30 * 60 * 1000)); } catch {}
+    const overlay = document.getElementById('sleep-overlay');
+    if (overlay) overlay.hidden = true;
+    showToast('家长已解锁 30 分钟');
+  };
+}
+
 function renderHome() {
   const h = new Date().getHours();
   const hello = h < 11 ? '早上好' : h < 18 ? '下午好' : '晚上好';
@@ -1532,7 +1724,7 @@ function renderHome() {
   }
   setStars(getStars());
   renderUsage();
-  applyTheme(preferredTheme());
+  applyTime();
 }
 
 function awardDailyStar() {
@@ -1736,6 +1928,8 @@ function applyLook() {
     el.dataset.hat = look.hat;
     el.dataset.hair = look.hair;
     el.dataset.jewelry = look.jewelry;
+    el.dataset.dress = look.dress || 'dress-none';
+    el.classList.toggle('has-dress', (look.dress || 'dress-none') !== 'dress-none');
   });
   scheduleProfileSync();
 }
@@ -1755,20 +1949,37 @@ function renderDress() {
   cats.querySelectorAll('.dress-cat').forEach(btn => {
     btn.onclick = () => { dressCategory = btn.dataset.cat; renderDress(); };
   });
+  const balance = document.getElementById('dress-balance');
+  if (balance) balance.textContent = `我的星星：${rewards.getStars()} 颗 · 裙装是购买制，买下会消耗星星`;
   const look = rewards.getLook();
   itemsBox.innerHTML = '';
   (ITEMS[dressCategory] || []).forEach(item => {
     const owned = rewards.isOwned(item.id);
     const selected = look[dressCategory] === item.id;
+    const premium = !!item.premium;
+    const costText = owned
+      ? (selected ? '正在穿' : '已拥有')
+      : (premium ? `花 ${item.cost} 星` : `需 ${item.cost} 星`);
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'dress-item' + (selected ? ' selected' : '') + (owned ? '' : ' locked');
-    btn.innerHTML = `<span class="sw" style="background:${item.color}"></span><span>${item.name}</span><span class="cost">${owned ? (selected ? '正在穿' : '已拥有') : `需 ${item.cost} 星`}</span>`;
+    btn.innerHTML = `<span class="sw" style="background:${item.color}"></span><span>${item.name}</span><span class="cost">${costText}</span>`;
     btn.onclick = () => {
       if (owned) {
         rewards.setLook(dressCategory, item.id);
         applyLook();
         renderDress();
+      } else if (premium) {
+        if (rewards.buyItem(item.id)) {
+          rewards.setLook(dressCategory, item.id);
+          setStars(rewards.getStars());
+          applyLook();
+          renderDress();
+          sfx.star();
+          showToast(`花 ${item.cost} 颗星星，买下了${item.name}`);
+        } else {
+          showToast(`还差 ${item.cost - rewards.getStars()} 颗星星`);
+        }
       } else if (rewards.getStars() >= item.cost) {
         rewards.unlockItem(item.id);
         rewards.setLook(dressCategory, item.id);
@@ -1865,7 +2076,7 @@ function renderHomework() {
   const head = `
     <div class="hw-tabs">${tabs}</div>
     <div class="task-progress">${tasks.map(t => `<i class="task-dot ${done.has(t.id) ? 'done' : ''}"></i>`).join('')}</div>
-    <span class="task-subject">${q.subject} · 第 ${subjectDone(q.subject, tasks, done) + 1} 题</span>`;
+    <span class="task-subject">${q.subject} · 第 ${subjectDone(q.subject, tasks, done) + 1} 题${q.tag ? ` · ${q.tag}` : ''}</span>`;
 
   const wireTabs = () => {
     body.querySelectorAll('.hw-tab').forEach(btn => {
@@ -1906,7 +2117,7 @@ function renderHomework() {
   body.innerHTML = `${head}
     <div class="task-q">${q.q}</div>
     <div class="task-options">${q.options.map((o, i) => `<button class="task-opt" type="button" data-i="${i}">${o}</button>`).join('')}</div>
-    <p class="sheet-note">答对一题得 1 颗星星，答错不扣星星。这一套共 ${tasks.length} 题。</p>`;
+    <p class="sheet-note">${q.type === 'open' ? '这道题没有标准答案，选一个你最想的，说说你的想法。' : `答对一题得 1 颗星星，答错不扣星星。这一套共 ${tasks.length} 题。`}</p>`;
   wireTabs();
   body.querySelectorAll('.task-opt').forEach(btn => {
     btn.onclick = () => answerHomework(q, Number(btn.dataset.i), btn);
@@ -2049,11 +2260,13 @@ async function submitDrawing(q, canvas) {
 }
 
 function answerHomework(q, i, btn) {
-  if (i === q.answer) {
+  const isOpen = q.type === 'open';
+  if (isOpen || i === q.answer) {
     rewards.completeHomework(q.id);
     sfx.star();
     setStars(getStars());
-    showToast('答对啦，得到一颗星星');
+    showToast(isOpen ? '这个想法真有意思，得到一颗星星' : '答对啦，得到一颗星星');
+    if (isOpen) speak('这个想法真有意思，姐姐喜欢听你说。', 'happy');
     renderHomework();
   } else {
     showToast('再想想，姐姐觉得你可以的');
@@ -2153,6 +2366,8 @@ function initHome() {
   }, 15000);
 
   renderHome();
+  bindSleep();
+  setInterval(applyTime, 30000);
 }
 
 /* ---------- 启动：连记忆库 -> 灌入事实 -> 回显历史 -> 停在首页 ---------- */
@@ -2455,5 +2670,14 @@ document.addEventListener('keydown', e => {
 
 initHome();
 </script>
+  <div class="sleep-overlay" id="sleep-overlay" hidden>
+    <div class="sleep-card">
+      <div class="sleep-moon"></div>
+      <h2 id="sleep-title">该睡觉啦</h2>
+      <p>已经 21:40 了，姐姐也要休息啦。<br>明天早上再来找我吧。</p>
+      <p class="sleep-time" id="sleep-time"></p>
+      <button type="button" class="sleep-parent" id="sleep-parent">家长解锁</button>
+    </div>
+  </div>
 </body>
 </html>

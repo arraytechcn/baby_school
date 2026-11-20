@@ -18,6 +18,7 @@ const HOMEWORK_KEY = 'xjx_homework';
 export const CATEGORIES = [
   { id: 'top', name: '上衣' },
   { id: 'bottom', name: '下装' },
+  { id: 'dress', name: '裙装' },
   { id: 'shoes', name: '鞋子' },
   { id: 'hat', name: '帽子' },
   { id: 'hair', name: '头饰' },
@@ -36,6 +37,14 @@ export const ITEMS = {
     { id: 'bottom-blue', name: '蓝色睡裤', color: '#8FB0D6', cost: 3, type: 'pants' },
     { id: 'bottom-navy', name: '藏蓝运动裤', color: '#4F6B86', cost: 5, type: 'pants' },
     { id: 'bottom-gold', name: '金色裙子', color: '#E7B36A', cost: 9, type: 'skirt' },
+  ],
+  dress: [
+    { id: 'dress-none', name: '不穿裙装', color: '#F3E8DC', cost: 0, none: true },
+    { id: 'gown-star', name: '星星纱裙', color: '#CBB7E8', cost: 30, premium: true },
+    { id: 'gown-rainbow', name: '彩虹礼服', color: '#F3B7C6', cost: 50, premium: true },
+    { id: 'gown-moon', name: '月光长裙', color: '#9FB6D9', cost: 100, premium: true },
+    { id: 'gown-flower', name: '花仙子裙', color: '#E9A6B8', cost: 200, premium: true },
+    { id: 'gown-dream', name: '星愿公主裙', color: '#F2D9A6', cost: 500, premium: true },
   ],
   shoes: [
     { id: 'shoe-brown', name: '棕色皮鞋', color: '#8A6844', cost: 0 },
@@ -63,6 +72,7 @@ export const ITEMS = {
 const DEFAULT_LOOK = {
   top: 'top-cream',
   bottom: 'bottom-denim',
+  dress: 'dress-none',
   shoes: 'shoe-brown',
   hat: 'hat-none',
   hair: 'hair-none',
@@ -116,6 +126,7 @@ export const rewards = {
   syncUnlocks() {
     const stars = this.getStars();
     Object.values(ITEMS).flat().forEach(item => {
+      if (item.premium) return;
       if (item.cost > 0 && stars >= item.cost) this.unlockItem(item.id);
     });
   },
@@ -135,18 +146,26 @@ export const rewards = {
     const item = this.itemById(id);
     if (!item) return false;
     if (item.cost === 0) return true;
-    const owned = read(ITEMS_KEY, ['top-cream', 'bottom-denim', 'shoe-brown', 'hat-none', 'hair-none', 'jewelry-none']);
+    const owned = read(ITEMS_KEY, ['top-cream', 'bottom-denim', 'dress-none', 'shoe-brown', 'hat-none', 'hair-none', 'jewelry-none']);
     return Array.isArray(owned) && owned.includes(id);
   },
   unlockItem(id) {
     const item = this.itemById(id);
     if (!item) return;
-    const owned = read(ITEMS_KEY, ['top-cream', 'bottom-denim', 'shoe-brown', 'hat-none', 'hair-none', 'jewelry-none']);
+    const owned = read(ITEMS_KEY, ['top-cream', 'bottom-denim', 'dress-none', 'shoe-brown', 'hat-none', 'hair-none', 'jewelry-none']);
     const list = Array.isArray(owned) ? owned : [];
     if (!list.includes(id)) {
       list.push(id);
       write(ITEMS_KEY, list);
     }
+  },
+  buyItem(id) {
+    const item = this.itemById(id);
+    if (!item || !item.premium || this.isOwned(id)) return false;
+    if (this.getStars() < item.cost) return false;
+    this.setStars(this.getStars() - item.cost);
+    this.unlockItem(id);
+    return true;
   },
   getLook() {
     let saved = read(LOOK_KEY, null);
