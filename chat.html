@@ -378,12 +378,13 @@
   body.dressing #character { visibility: hidden; }
   body:not(.in-call) #call-panel { display: none; }
 
-  .home-top { display: flex; align-items: flex-start; gap: 12px; padding: 26px 20px 0; }
+  .home-top { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px 0; }
   .home-hello { font-size: 22px; font-weight: 600; line-height: 1.3; }
   .home-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #a08b80; padding: 2px 20px 0; }
   .home-profile { color: #A8471F; font-weight: 600; }
   .meta-dot { color: #C9B3A3; }
   #home[data-theme="night"] .home-meta { color: #B7A9B8; }
+  #home-time { font-variant-numeric: tabular-nums; }
   #home[data-theme="night"] .home-profile { color: #F0C9A8; }
 
   .home-stats { margin-left: auto; display: flex; align-items: center; gap: 4px; }
@@ -506,7 +507,7 @@
 
   .character {
     position: absolute; left: 50%; bottom: 2%;
-    height: 92%; max-height: 680px; aspect-ratio: 220 / 380;
+    height: 96%; max-height: 760px; aspect-ratio: 220 / 380;
     transform: translateX(-50%);
     cursor: pointer; outline: none;
     -webkit-tap-highlight-color: transparent;
@@ -661,7 +662,7 @@
     .home-hello { font-size: 20px; }
     .scene-window { width: 46%; height: 42%; }
     .scene-plant { transform: scale(0.86); transform-origin: bottom right; }
-    .character { height: 90%; }
+    .character { height: 96%; }
     .action { min-height: 50px; font-size: 14px; }
     .action.primary { min-height: 56px; font-size: 16px; }
   }
@@ -967,6 +968,77 @@
   [data-dress="dress-green"] .gown-basic-skirt { fill: #A8C8A8; }
 
   [data-hat]:not([data-hat="hat-none"]) .ch-tiara { display: none; }
+
+  /* ---------- 场景 ---------- */
+  #home[data-scene]:not([data-scene="scene-room"]) .scene-window { display: none; }
+  #home[data-scene="scene-starry"] { background: linear-gradient(180deg, #141A2E 0%, #2E3952 60%, #3A4664 100%); }
+  #home[data-scene="scene-beach"] { background: linear-gradient(180deg, #9FDFF2 0%, #D6F3FA 55%, #F6E3B8 100%); }
+  #home[data-scene="scene-forest"] { background: linear-gradient(180deg, #CFE8D5 0%, #E7F1D8 55%, #F2E6C8 100%); }
+  #home[data-scene="scene-garden"] { background: linear-gradient(180deg, #FFE8F0 0%, #FBEFF5 55%, #EAF6DF 100%); }
+  #home[data-scene="scene-cloud"] { background: linear-gradient(180deg, #DCEBF7 0%, #F4FBFF 55%, #FFF8EE 100%); }
+  #home[data-scene="scene-castle"] { background: linear-gradient(180deg, #D8C4F0 0%, #ECDCF2 55%, #F3E4D2 100%); }
+  #home[data-scene="scene-snow"] { background: linear-gradient(180deg, #DCEBF7 0%, #F4FAFF 55%, #FFFFFF 100%); }
+  #home[data-scene="scene-space"] { background: linear-gradient(180deg, #141A2E 0%, #232C46 60%, #2B2444 100%); }
+  #home[data-scene="scene-rainbow"] { background: linear-gradient(180deg, #FFD1DC 0%, #D8C4F0 35%, #B9E3F0 65%, #FFF3D6 100%); }
+
+  #home[data-scene="scene-starry"] .home-hello,
+  #home[data-scene="scene-space"] .home-hello { color: #FFF3D6; }
+  #home[data-scene="scene-starry"] .home-meta,
+  #home[data-scene="scene-space"] .home-meta,
+  #home[data-scene="scene-starry"] .usage-text,
+  #home[data-scene="scene-space"] .usage-text { color: #C9C0D2; }
+  #home[data-scene="scene-starry"] .home-profile,
+  #home[data-scene="scene-space"] .home-profile { color: #F0C9A8; }
+  #home[data-scene="scene-starry"] .icon-btn,
+  #home[data-scene="scene-space"] .icon-btn { color: #F3E7D8; }
+  #home[data-scene="scene-starry"] .usage-track,
+  #home[data-scene="scene-space"] .usage-track { background: rgba(255, 255, 255, 0.14); }
+
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .home-hello { color: #5a4a42; }
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .home-meta,
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .usage-text { color: #8a6f5c; }
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .home-profile { color: #A8471F; }
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .icon-btn { color: #5a4a42; }
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .usage-track { background: rgba(90, 74, 66, 0.12); }
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .stat,
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .action { background: rgba(255, 255, 255, 0.72); border-color: #efdfcf; color: #5a4a42; }
+  #home:is([data-scene="scene-beach"], [data-scene="scene-forest"], [data-scene="scene-garden"], [data-scene="scene-cloud"], [data-scene="scene-castle"], [data-scene="scene-snow"], [data-scene="scene-rainbow"]) .action.primary { background: #FFB37E; border-color: #FFB37E; color: #fff; }
+
+  #home[data-scene="scene-beach"] .scene::before { content: ""; position: absolute; z-index: 0; top: 9%; right: 12%; width: 66px; height: 66px; border-radius: 50%; background: #FFE08A; box-shadow: 0 0 0 16px rgba(255, 224, 138, 0.2); }
+  #home[data-scene="scene-starry"] .scene::before { content: ""; position: absolute; z-index: 0; top: 12%; right: 14%; width: 56px; height: 56px; border-radius: 50%; background: #F6EBCF; box-shadow: -14px 6px 0 0 #141A2E; }
+  #home[data-scene="scene-space"] .scene::before { content: ""; position: absolute; z-index: 0; top: 12%; left: 8%; width: 74px; height: 74px; border-radius: 50%; background: #B9A6D8; box-shadow: 0 0 0 12px rgba(185, 166, 216, 0.18); }
+  #home[data-scene="scene-castle"] .scene::before { content: ""; position: absolute; z-index: 0; top: 10%; right: 16%; width: 54px; height: 54px; border-radius: 50%; background: #FFF3D6; box-shadow: -12px 5px 0 0 #D8C4F0; }
+  #home[data-scene="scene-snow"] .scene::before { content: ""; position: absolute; z-index: 0; top: 10%; right: 18%; width: 48px; height: 48px; border-radius: 50%; background: #FFF3D6; box-shadow: 0 0 0 14px rgba(255, 243, 214, 0.35); }
+  #home[data-scene="scene-forest"] .scene::before,
+  #home[data-scene="scene-garden"] .scene::before { content: ""; position: absolute; z-index: 0; top: 8%; right: 16%; width: 52px; height: 52px; border-radius: 50%; background: #FFE0B8; box-shadow: 0 0 0 14px rgba(255, 224, 184, 0.24); }
+
+  #home[data-scene="scene-beach"] .scene-rug { background: #F6E3B8; }
+  #home[data-scene="scene-forest"] .scene-rug { background: #A8C8A8; }
+  #home[data-scene="scene-garden"] .scene-rug { background: #CBE3B0; }
+  #home[data-scene="scene-cloud"] .scene-rug { background: #FFF8EE; }
+  #home[data-scene="scene-castle"] .scene-rug { background: #C9B7E6; }
+  #home[data-scene="scene-snow"] .scene-rug { background: #FFFFFF; }
+  #home[data-scene="scene-starry"] .scene-rug { background: rgba(201, 214, 242, 0.18); }
+  #home[data-scene="scene-space"] .scene-rug { background: rgba(185, 166, 216, 0.2); }
+  #home[data-scene="scene-rainbow"] .scene-rug { background: linear-gradient(90deg, #FFD1DC, #FFF3D6, #B9E3F0); }
+  #home[data-scene]:not([data-scene="scene-room"]):not([data-scene="scene-forest"]):not([data-scene="scene-garden"]) .scene-plant { display: none; }
+  #home[data-scene="scene-starry"] .scene-stars,
+  #home[data-scene="scene-space"] .scene-stars { opacity: 1; }
+
+  #dress-preview {
+    border-radius: 16px;
+    background: linear-gradient(180deg, #FFF7EC 0%, #FCE9D7 100%);
+    transition: background 0.4s ease;
+  }
+  #dress-preview[data-scene="scene-starry"] { background: linear-gradient(180deg, #1B2438 0%, #3A4664 100%); }
+  #dress-preview[data-scene="scene-beach"] { background: linear-gradient(180deg, #9FDFF2 0%, #F6E3B8 100%); }
+  #dress-preview[data-scene="scene-forest"] { background: linear-gradient(180deg, #CFE8D5 0%, #F2E6C8 100%); }
+  #dress-preview[data-scene="scene-garden"] { background: linear-gradient(180deg, #FFE8F0 0%, #EAF6DF 100%); }
+  #dress-preview[data-scene="scene-cloud"] { background: linear-gradient(180deg, #DCEBF7 0%, #FFF8EE 100%); }
+  #dress-preview[data-scene="scene-castle"] { background: linear-gradient(180deg, #D8C4F0 0%, #F3E4D2 100%); }
+  #dress-preview[data-scene="scene-snow"] { background: linear-gradient(180deg, #DCEBF7 0%, #FFFFFF 100%); }
+  #dress-preview[data-scene="scene-space"] { background: linear-gradient(180deg, #141A2E 0%, #2B2444 100%); }
+  #dress-preview[data-scene="scene-rainbow"] { background: linear-gradient(180deg, #FFD1DC 0%, #D8C4F0 35%, #B9E3F0 65%, #FFF3D6 100%); }
 </style>
 </head>
 <body>
@@ -977,7 +1049,6 @@
   <!-- 首页：角色 + 场景 + 四个入口 -->
   <div id="home" data-theme="day">
     <header class="home-top">
-      <div class="top-clock" id="top-clock"><i class="clock-dot" id="clock-dot"></i><span id="clock-time">--:--</span></div>
       <div>
         <div class="home-hello" id="home-hello">晚上好</div>
       </div>
@@ -1006,6 +1077,8 @@
       <span class="home-profile" id="home-profile">7 岁 · 二年级</span>
       <span class="meta-dot">·</span>
       <span id="home-date"></span>
+      <span class="meta-dot">·</span>
+      <span id="home-time">--:--</span>
     </div>
 
     <div class="home-usage">
@@ -1893,7 +1966,7 @@ function applyTime() {
     home.dataset.phase = phase;
     home.dataset.theme = ['evening', 'night', 'midnight'].includes(phase) ? 'night' : 'day';
   }
-  const clock = document.getElementById('clock-time');
+  const clock = document.getElementById('home-time') || document.getElementById('clock-time');
   if (clock) {
     clock.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   }
@@ -2128,6 +2201,11 @@ function exitCall() {
 
 function applyLook() {
   const look = rewards.getLook();
+  const scene = look.scene || 'scene-room';
+  const homeEl = document.getElementById('home');
+  if (homeEl) homeEl.dataset.scene = scene;
+  const previewEl = document.getElementById('dress-preview');
+  if (previewEl) previewEl.dataset.scene = scene;
   ['character', 'dress-preview'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -2159,8 +2237,11 @@ function renderDress() {
   cats.querySelectorAll('.dress-cat').forEach(btn => {
     btn.onclick = () => { dressCategory = btn.dataset.cat; renderDress(); };
   });
+  const isScene = dressCategory === 'scene';
   const balance = document.getElementById('dress-balance');
-  if (balance) balance.textContent = `我的星星：${rewards.getStars()} 颗 · 裙装是购买制，买下会消耗星星`;
+  if (balance) balance.textContent = isScene
+    ? `我的星星：${rewards.getStars()} 颗 · 场景是购买制，买下会消耗星星`
+    : `我的星星：${rewards.getStars()} 颗 · 裙装是购买制，买下会消耗星星`;
   const look = rewards.getLook();
   itemsBox.innerHTML = '';
   (ITEMS[dressCategory] || []).forEach(item => {
@@ -2168,7 +2249,7 @@ function renderDress() {
     const selected = look[dressCategory] === item.id;
     const premium = !!item.premium;
     const costText = owned
-      ? (selected ? '正在穿' : '已拥有')
+      ? (selected ? (isScene ? '使用中' : '正在穿') : '已拥有')
       : (premium ? `花 ${item.cost} 星` : `需 ${item.cost} 星`);
     const btn = document.createElement('button');
     btn.type = 'button';
