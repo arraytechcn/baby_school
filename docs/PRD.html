@@ -440,7 +440,7 @@
 <div class="progress" id="progress" aria-hidden="true"></div>
 
 <header class="topbar">
-  <div class="brand">小星姐姐<span>PRD · V1.2</span></div>
+  <div class="brand">小星姐姐<span>PRD · V1.3</span></div>
   <button class="print-btn" id="print-btn" type="button">打印 / 导出 PDF</button>
 </header>
 
@@ -449,7 +449,7 @@
     <div class="side-head">
       <div class="kicker">产品需求文档</div>
       <div class="doc-title">儿童 AI 智能伙伴 H5</div>
-      <p class="doc-sub">小星姐姐 / 成长陪伴室 · V1.2</p>
+      <p class="doc-sub">小星姐姐 / 成长陪伴室 · V1.3</p>
     </div>
 
     <nav id="toc" aria-label="文档目录">
@@ -480,7 +480,7 @@
 
   <main id="doc">
     <section class="cover">
-      <div class="kicker">V1.2 · 2026-11-20 · 产品需求文档</div>
+      <div class="kicker">V1.3 · 2026-11-20 · 产品需求文档</div>
       <h1>小星姐姐<em>成长陪伴室</em></h1>
       <p class="lede">一个面向儿童的语音智能伙伴 H5。孩子可以像"打电话"一样和虚拟姐姐聊天、互动、换装、做轻学习任务；家长可以控制价值观、使用时长、敏感话题和学习内容。</p>
 
@@ -802,7 +802,9 @@
       <h4>6.3.3 服装体系</h4>
       <ul>
         <li>7 个分类各 10 件，共 70 件（含"不穿 / 自然"）：上衣 10、下装 10、裙装 10、鞋子 10、帽子 10、头饰 10、首饰 10</li>
-        <li>基础款以不同配色区分，价格 2–9 星，达到星星门槛自动解锁；带价格的款式使用独立版型</li>
+        <li>70 件全部独立 SVG 绘制：领口、袖型、衣身、裙型、鞋型、帽型、发饰、首饰各自不同，不再共用同一路径换色</li>
+        <li>由 `js/wardrobe.js` 按 `data-wd` 图层渲染；角色身体、头、头发、脸、手臂、腿保留</li>
+        <li>基础款 2–9 星，达到星星门槛自动解锁；带价格的款式为独立版型和独立 SVG</li>
         <li>购买制款式：星月披肩 30、银河长裙 50、水晶鞋 100、小皇冠 30、星月发冠 50、月光项链 50</li>
         <li>裙装礼服 5 件：A 字纱裙、层叠蓬蓬裙、月光披风长裙、花仙子围裙、公主球裙（带皇冠），价格 30 / 50 / 100 / 200 / 500 星</li>
       </ul>
@@ -1092,6 +1094,7 @@
         <li>家长设置表</li>
         <li>风险事件表</li>
       </ul>
+      <p><strong>衣橱资产：</strong>`js/wardrobe.js` 维护 70 件独立 SVG 版型，按分类渲染到角色的 `data-wd` 图层；角色本体与衣橱分离，新增衣服只需追加一个 SVG 生成器。</p>
       <p><strong>当前已落地：</strong>SQLite 的 messages / facts / profiles(name, data) 三张表；profiles 按孩子名字保存 API Key、父母设置、星星、服装、搭配、作业进度和音色；局域网用本地 CA 签发 HTTPS 证书，手机安装后可正常使用麦克风。</p>
     </section>
 
@@ -1109,7 +1112,7 @@
             <li>基础安全拦截</li>
             <li>家长面板（时长 / 学科 / 禁止话题）</li>
             <li>星星奖励</li>
-            <li>分部位换装（每类 10 件）+ 购买制礼服 / 配饰</li>
+            <li>分部位换装（每类 10 件、70 件独立 SVG）+ 购买制礼服 / 配饰</li>
             <li>30 分钟限制 + 21:40 睡觉锁</li>
             <li>API 故障兜底</li>
             <li>三年级 / 五年级挑战题，超纲题 10 星</li>
@@ -1318,7 +1321,7 @@
       </ol>
 
       <div class="footer">
-        <span>小星姐姐 / 成长陪伴室 · PRD V1.2</span>
+        <span>小星姐姐 / 成长陪伴室 · PRD V1.3</span>
         <span>内部产品需求文档 · 2026-11-20</span>
       </div>
     </section>

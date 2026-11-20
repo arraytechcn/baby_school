@@ -850,6 +850,14 @@
   [data-hat="hat-cap"] .ch-tiara,
   [data-hat="hat-beret"] .ch-tiara { display: none; }
 
+  /* 旧衣橱层全部停用，改由 js/wardrobe.js 渲染独立 SVG */
+  .ch-top, .ch-collar, .ch-button, .ch-deco, .ch-gown, .ch-cape,
+  .ch-skirt-galaxy, .ch-shoe-crystal, .ch-necklace, .ch-bracelet,
+  .ch-moon-necklace, .ch-hair-bow, .ch-hair-star, .ch-hair-crown,
+  .ch-tiara, .ch-cap, .ch-beret, .ch-crown, .ch-pants, .ch-waist,
+  .ch-skirt, .ch-shoe, .ch-sole { display: none !important; }
+  .wd-layer { pointer-events: none; }
+
   .ch-deco { display: none; }
   [data-top="top-pajama"] .ch-deco-pajama { display: block; }
   [data-top="top-tee"] .ch-deco-sport { display: block; }
@@ -1042,6 +1050,7 @@
           <path class="ch-shoe" d="M115 342 h19 a7 7 0 0 1 7 7 v2 h-30 v-2 a5 5 0 0 1 4-7z"/>
           <rect class="ch-sole" x="80" y="350" width="27" height="3" rx="1.5"/>
           <rect class="ch-sole" x="113" y="350" width="29" height="3" rx="1.5"/>
+          <g class="wd-layer" data-wd="shoes"></g>
           <g class="ch-shoe-crystal">
             <path fill="#DCEBF7" opacity="0.92" d="M84 340 h18 a8 8 0 0 1 8 8 v3 H80 v-3 a6 6 0 0 1 4-8z"/>
             <path fill="#DCEBF7" opacity="0.92" d="M115 340 h19 a8 8 0 0 1 7 8 v3 h-30 v-3 a6 6 0 0 1 4-8z"/>
@@ -1056,6 +1065,7 @@
 
           <!-- 裙子（节日） -->
           <path class="ch-skirt" d="M82 236 L138 236 L158 300 C158 310 150 316 140 316 H80 C70 316 62 310 62 300 Z"/>
+          <g class="wd-layer" data-wd="bottom"></g>
           <g class="ch-skirt-galaxy">
             <path fill="#9FB6D9" d="M82 236 L138 236 L160 306 H60 Z"/>
             <path fill="#C9D6F2" opacity="0.55" d="M82 236 L138 236 L146 270 H74 Z"/>
@@ -1072,6 +1082,7 @@
           <path class="ch-top" d="M84 136 C74 142 70 158 72 174 L86 172 L92 142 Z"/>
           <path class="ch-top" d="M136 136 C146 142 150 158 148 174 L134 172 L128 142 Z"/>
           <path class="ch-collar" d="M96 130 C102 138 108 141 110 141 C112 141 118 138 124 130 C120 127 115 126 110 126 C105 126 100 127 96 130 Z"/>
+          <g class="wd-layer" data-wd="dress"></g>
           <g class="ch-gown gown-star">
             <path fill="#CBB7E8" d="M84 136 C80 152 78 172 80 196 L140 196 C142 172 140 152 136 136 Z"/>
             <path fill="#CBB7E8" d="M80 196 C70 222 62 262 56 302 L164 302 C158 262 150 222 140 196 Z"/>
@@ -1178,6 +1189,8 @@
           <g class="ch-bracelet">
             <ellipse cx="74" cy="220" rx="6" ry="2.4" fill="none" stroke="#B04A28" stroke-width="2"/>
           </g>
+          <g class="wd-layer" data-wd="top"></g>
+          <g class="wd-layer" data-wd="jewelry"></g>
 
           <!-- 脖子与头 -->
           <rect class="ch-skin" x="99" y="112" width="22" height="18" rx="8"/>
@@ -1217,6 +1230,7 @@
           <g class="ch-tiara">
             <path d="M94 58 L100 50 L106 58 L112 48 L118 58 L124 52 L122 64 L96 64 Z" fill="#F4D35E" stroke="#E0B93F" stroke-width="1"/>
           </g>
+          <g class="wd-layer" data-wd="hair"></g>
 
           <!-- 帽子 -->
           <g class="ch-cap">
@@ -1229,6 +1243,8 @@
             <ellipse cx="110" cy="60" rx="30" ry="5" fill="#8A3A1E"/>
             <circle cx="142" cy="40" r="7" fill="#FFF3D6"/>
           </g>
+          <g class="wd-layer" data-wd="hat"></g>
+          <g class="wd-layer" data-wd="crown"></g>
           <g class="ch-crown">
             <path d="M88 64 L94 44 L104 58 L110 38 L116 58 L126 44 L132 64 Z" fill="#F4D35E" stroke="#E0B93F" stroke-width="1.2"/>
             <path d="M88 64 H132 V70 H88 Z" fill="#E0B93F"/>
@@ -1477,6 +1493,7 @@ import { sfx } from './js/sfx.js';
 import { asr } from './js/asr.js';
 import { replySmart, greeting, sanitize } from './js/brain.js';
 import { qwen, getParentConfig, setParentConfig } from './js/qwen.js';
+import { renderWardrobe } from './js/wardrobe.js';
 import { store } from './js/store.js';
 import { memory } from './js/memory.js';
 import { rewards, CATEGORIES, ITEMS, SUBJECTS, PER_SUBJECT } from './js/rewards.js';
@@ -2122,6 +2139,7 @@ function applyLook() {
     el.dataset.jewelry = look.jewelry;
     el.dataset.dress = look.dress || 'dress-none';
     el.classList.toggle('has-dress', (look.dress || 'dress-none') !== 'dress-none');
+    renderWardrobe(el, look);
   });
   scheduleProfileSync();
 }
