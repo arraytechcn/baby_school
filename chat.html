@@ -1717,6 +1717,7 @@ function renderHome() {
   const profileEl = document.getElementById('home-profile');
   if (profileEl) profileEl.textContent = `${age} 岁 · ${grade}`;
   if (helloEl) helloEl.textContent = hello + name;
+  document.title = memory.name ? `小星姐姐 — ${memory.name}` : '小星姐姐 — 成长陪伴室';
   if (dateEl) {
     dateEl.textContent = new Date().toLocaleDateString('zh-CN', {
       month: 'long', day: 'numeric', weekday: 'short',
@@ -2251,7 +2252,7 @@ async function submitDrawing(q, canvas) {
     feedback = await qwen.drawingFeedback({ prompt: q.q, colors, strokes: drawStrokes });
   } catch {}
   if (!feedback) {
-    feedback = `我看到你用了${colors.length ? colors.join('、') : '好几种颜色'}，画得好认真呀！能给姐姐讲讲你画的是什么吗？`;
+    feedback = `朱炘榆画得真认真！我看到你用了${colors.length ? colors.join('、') : '好几种颜色'}，能给姐姐讲讲你画的是什么吗？`;
   }
   const textEl = document.getElementById('draw-feedback-text');
   if (textEl) textEl.textContent = feedback;

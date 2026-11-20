@@ -41,6 +41,14 @@ MAX_BULK = 500
 MAX_LIMIT = 500
 FACT_KINDS = ('name', 'likes', 'pets', 'friends', 'misc')
 
+# 语音识别历史遗留的错名统一归到正确名字，旧页面继续写入也不会分叉
+NAME_ALIASES = {'朱欣雨': '朱炘榆', '朱曦匀': '朱炘榆'}
+
+
+def canonical_name(name):
+    name = str(name or '').strip()[:32]
+    return NAME_ALIASES.get(name, name)
+
 BLOCKED_DIRS = ('data', 'tools', '.git', '.dsh', '_private')
 BLOCKED_FILES = ('config.local.json',)
 
@@ -114,7 +122,7 @@ def read_facts(conn):
     for row in conn.execute('SELECT kind, value FROM facts ORDER BY rowid'):
         kind, value = row['kind'], row['value']
         if kind == 'name':
-            facts['name'] = value
+            facts['name'] = canonical_name(value)
         elif kind in facts:
             facts[kind].append(value)
     return facts
@@ -122,7 +130,7 @@ def read_facts(conn):
 
 def write_facts(conn, facts):
     conn.execute('DELETE FROM facts')
-    name = str(facts.get('name') or '').strip()[:32]
+    name = canonical_name(facts.get('name'))
     if name:
         conn.execute("INSERT INTO facts (kind, value) VALUES ('name', ?)", (name,))
     for kind in ('likes', 'pets', 'friends', 'misc'):
@@ -331,7 +339,7 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- 孩子档案（按名字同步配置/成长数据） ----
     def _profile_get(self, parsed):
-        name = (parse_qs(parsed.query).get('name') or [''])[0].strip()[:32]
+        name = canonical_name((parse_qs(parsed.query).get('name') or [''])[0])
         if not name:
             return self._error(400, 'missing name')
         conn = connect()
@@ -353,10 +361,11 @@ class Handler(BaseHTTPRequestHandler):
         body = self._body()
         if not isinstance(body, dict):
             return self._error(400, 'bad body')
-        name = str(body.get('name') or '').strip()[:32]
+        name = canonical_name(body.get('name'))
         data = body.get('data')
         if not name or not isinstance(data, dict):
             return self._error(400, 'bad profile')
+        data['childName'] = name
         raw = json.dumps(data, ensure_ascii=False)
         if len(raw) > 200_000:
             return self._error(413, 'profile too large')

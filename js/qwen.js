@@ -22,6 +22,24 @@ const MAX_HISTORY = 6; // 只带最近 6 轮
 const KEY_STORAGE = 'xjx_dashscope_key';
 const CONFIG_STORAGE = 'xjx_parent_config';
 
+// 语音识别曾把“朱炘榆”听成“朱欣雨/朱曦匀”，历史和回复里统一纠正
+const CHILD_NAME = '朱炘榆';
+const NAME_ALIASES = ['朱曦匀', '朱欣雨'];
+
+function canonicalName() {
+  const current = String(memory.name || '').trim();
+  return (!current || NAME_ALIASES.includes(current)) ? CHILD_NAME : current;
+}
+
+function normalizeName(text) {
+  let out = String(text || '');
+  const name = canonicalName();
+  NAME_ALIASES.forEach(oldName => {
+    out = out.split(oldName).join(name);
+  });
+  return out;
+}
+
 /* ---------- 父母配置（配置页写入，这里读取） ---------- */
 const DEFAULT_CONFIG = {
   values: ['诚实', '友善', '勇敢'],        // 核心思想标签
@@ -57,17 +75,18 @@ export function buildSystemPrompt() {
   if (cfg.customValue) values.push(cfg.customValue);
 
   const facts = memory.facts;
+  const name = canonicalName();
   const memoryLines = [];
-  if (facts.name) memoryLines.push(`孩子叫${facts.name}`);
+  if (name) memoryLines.push(`孩子叫${name}`);
   if (facts.likes.length) memoryLines.push(`孩子喜欢：${facts.likes.join('、')}`);
   if (facts.pets.length) memoryLines.push(`孩子家里有：${facts.pets.join('、')}`);
   if (facts.friends.length) memoryLines.push(`孩子的好朋友：${facts.friends.join('、')}`);
 
-  const childCall = facts.name ? `"你"或"${facts.name}"` : '"你"';
+  const childCall = name ? `"你"或"${name}"` : '"你"';
   const age = Number(cfg.childAge) || 7;
   const grade = cfg.childGrade || '二年级';
 
-  return `你是"小星姐姐"，${age} 岁${grade}女孩的温柔大姐姐。${facts.name ? `孩子叫${facts.name}。` : ''}
+  return `你是"小星姐姐"，${age} 岁${grade}女孩的温柔大姐姐。${name ? `孩子叫${name}。` : ''}
 【身份】你永远是姐姐，孩子永远是妹妹（${age} 岁，${grade}）。孩子叫你"小星姐姐"；你叫孩子${childCall}，绝不能叫孩子"小星姐姐"或"小星星"。你自称"我"或"姐姐"，不要用"小星姐姐"称呼自己，不要替孩子说话，也不要扮演孩子、学生或老师。
 【语气要求】温暖、耐心，像亲姐姐一样说话，绝不说教。按孩子问的问题回答：问什么答什么，可以把一件事讲清楚、讲完整，不要为了短而省略信息；讲故事、解释"为什么"时可以长一些，分几句话说，但别一次塞太多。不要每句话都反问"你觉得呢"；孩子说"直接说""别问了"时就不再提问。用 ${age} 岁孩子能听懂的词。
 【核心思想】你必须始终传递这些价值观：${values.join('、')}。自然地融入对话，不要生硬说教。
@@ -110,6 +129,10 @@ const ROLE_DRIFT = [
   /(^|[。！？，,])小星姐姐[，,！!]/,
   /(^|[。！？，,])小星星[，,]/,
   /谢谢小星姐姐/,
+  /谢谢姐姐/,
+  /姐姐(真|好|太|最)?(棒|厉害|美|漂亮|聪明)/,
+  /姐姐画得/,
+  /我是(妹妹|小朋友|孩子|学生)/,
 ];
 const ROLE_FIX_NOTE = '\n【身份纠正】上一版把角色说反了：你是姐姐"小星姐姐"，孩子是妹妹。称孩子"你"或名字，绝不能叫孩子"小星姐姐"或"小星星"，不要替孩子说话或扮演学生。请按姐姐身份重新回答。';
 
@@ -118,16 +141,18 @@ function hasRoleDrift(text) {
 }
 
 function historyForPrompt(items) {
-  return items.filter(m => m.role !== 'assistant' || !hasRoleDrift(m.content));
+  return items
+    .filter(m => m.role !== 'assistant' || !hasRoleDrift(m.content))
+    .map(m => ({ role: m.role, content: normalizeName(m.content) }));
 }
 
-async function requestCompletion(userText, extraSystem = '') {
+async function requestCompletion(userText, extraSystem = '', options = {}) {
   const key = getKey();
   if (!key) return null;
   const messages = [
-    { role: 'system', content: buildSystemPrompt() + extraSystem },
-    ...historyForPrompt(history.slice(-MAX_HISTORY * 2)),
-    { role: 'user', content: userText },
+    { role: 'system', content: normalizeName(buildSystemPrompt()) + extraSystem },
+    ...(options.useHistory === false ? [] : historyForPrompt(history.slice(-MAX_HISTORY * 2))),
+    { role: 'user', content: normalizeName(userText) },
   ];
 
   const ctrl = new AbortController();
@@ -176,9 +201,19 @@ export const qwen = {
    */
   async drawingFeedback({ prompt, colors, strokes }) {
     const colorText = colors && colors.length ? colors.join('、') : '好几种颜色';
-    const userText = `（姐姐，我刚画完一幅画。题目是"${prompt}"，我用了${colorText}，画了大约 ${strokes} 笔。请夸夸我，并问问我画的是什么，30 个字以内。）`;
-    let reply = await requestCompletion(userText);
-    if (!reply) return null;
+    const system = `【画画反馈】你是小星姐姐，孩子是朱炘榆。她刚画完一幅画，你要以姐姐的身份夸她，叫她"朱炘榆"或"你"。绝不能让孩子夸你，绝不能出现"姐姐真棒/姐姐好棒/姐姐厉害/姐姐画得"这类话。只输出一句 30 字以内的温柔反馈，可以问问她画的是什么。`;
+    const userText = `题目是"${prompt}"，我用了${colorText}，画了大约 ${strokes} 笔。`;
+    const bad = /姐姐(真|好|太|最)?(棒|厉害|美|漂亮|聪明)|谢谢(小星)?姐姐|姐姐画得/;
+    let reply = await requestCompletion(userText, system, { useHistory: false });
+    if (reply && bad.test(reply)) {
+      reply = await requestCompletion(
+        userText,
+        system + '\n注意：你是姐姐，孩子是朱炘榆；不要让孩子夸你，不要出现"姐姐真棒"。',
+        { useHistory: false },
+      );
+    }
+    if (!reply || bad.test(reply)) return null;
+    reply = normalizeName(reply);
     reply = reply.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '').trim();
     if (!reply) return null;
     if (!scanReply(reply)) return null;
@@ -193,22 +228,24 @@ export const qwen = {
     if (!getKey()) return null;
     await ensureHistory();
 
-    let reply = await requestCompletion(userText);
+    const cleanText = normalizeName(userText);
+    let reply = await requestCompletion(cleanText);
     if (reply && hasRoleDrift(reply)) {
       // 角色说反了：带纠正提示重试一次
-      reply = await requestCompletion(userText, ROLE_FIX_NOTE);
+      reply = await requestCompletion(cleanText, ROLE_FIX_NOTE);
     }
     if (!reply) return null;
     if (hasRoleDrift(reply)) return null; // 重试仍错 -> 交给本地兜底
+    reply = normalizeName(reply);
     // 剥掉 emoji（项目规范 + 儿童界面一致性）
     reply = reply.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '').trim();
     if (!reply) return null;
     if (!scanReply(reply)) return null; // 输出扫描命中 -> 拦截，调用方走兜底
 
-    history.push({ role: 'user', content: userText });
+    history.push({ role: 'user', content: cleanText });
     history.push({ role: 'assistant', content: reply });
     if (history.length > MAX_HISTORY * 4) history = history.slice(-MAX_HISTORY * 2);
-    await store.appendMessage('user', userText);
+    await store.appendMessage('user', cleanText);
     await store.appendMessage('assistant', reply);
     return reply;
   },
